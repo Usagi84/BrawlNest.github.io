@@ -18,54 +18,122 @@
             min-height: 100vh;
         }
 
-        /* Navbar */
-        .navbar {
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
-            padding: 0 20px;
-            position: sticky;
-            top: 0;
+        /* Layout principal */
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: 250px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(15px);
+            border-right: 2px solid rgba(255, 255, 255, 0.2);
+            padding: 20px 0;
+            position: fixed;
+            height: 100vh;
             z-index: 1000;
+            transition: transform 0.3s ease;
         }
 
-        .nav-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            height: 70px;
+        .sidebar.mobile-hidden {
+            transform: translateX(-100%);
         }
 
-        .logo-nav {
-            display: flex;
-            align-items: center;
-            gap: 15px;
+        .logo-section {
+            text-align: center;
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 20px;
         }
 
         .logo-icon {
-            width: 50px;
-            height: 50px;
-            background: rgba(255, 255, 255, 0.3);
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.2);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 25px;
+            font-size: 30px;
+            margin: 0 auto 15px;
         }
 
+        .logo-text {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .nav-menu {
+            list-style: none;
+            padding: 0 20px;
+        }
+
+        .nav-menu li {
+            margin-bottom: 5px;
+        }
+
+        .nav-menu a {
+            display: block;
+            color: white;
+            text-decoration: none;
+            padding: 15px 20px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-menu a:hover, .nav-menu a.active {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(5px);
+        }
+
+        /* Mobile sidebar toggle */
+        .mobile-toggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 1.2em;
+            cursor: pointer;
+            z-index: 1001;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Zone de contenu principal */
+        .main-content {
+            flex: 1;
+            margin-left: 250px;
+            padding: 40px;
+            transition: margin-left 0.3s ease;
+        }
+
+        .main-content.mobile-full {
+            margin-left: 0;
+            padding: 80px 20px 20px;
+        }
+
+        /* Bouton retour */
         .back-button {
             background: rgba(255, 255, 255, 0.2);
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 12px 25px;
             border-radius: 25px;
             cursor: pointer;
             font-weight: bold;
             transition: all 0.3s ease;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
             display: none;
+            backdrop-filter: blur(10px);
         }
 
         .back-button:hover {
@@ -75,40 +143,6 @@
 
         .back-button.show {
             display: inline-block;
-        }
-
-        .logo-text {
-            font-size: 1.8em;
-            font-weight: bold;
-            color: white;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 30px;
-            list-style: none;
-        }
-
-        .nav-links a {
-            color: white;
-            text-decoration: none;
-            font-weight: 500;
-            padding: 10px 15px;
-            border-radius: 25px;
-            transition: all 0.3s ease;
-        }
-
-        .nav-links a:hover, .nav-links a.active {
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateY(-2px);
-        }
-
-        /* Container principal */
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 40px 20px;
         }
 
         /* Sections de contenu */
@@ -209,18 +243,23 @@
             margin-top: 10px;
         }
 
-        /* Événements */
-        .events-container {
+        /* Événements et News */
+        .events-container, .news-container {
             display: grid;
             gap: 20px;
         }
 
-        .event-card {
+        .event-card, .news-item {
             background: rgba(255, 255, 255, 0.95);
             border: 2px solid #ffa500;
             border-radius: 10px;
             padding: 20px;
             position: relative;
+        }
+
+        .news-item {
+            border-left: 4px solid #ff6600;
+            border-radius: 0 10px 10px 0;
         }
 
         .event-status {
@@ -243,53 +282,40 @@
             color: white;
         }
 
-        .event-title {
+        .status-finished {
+            background: #999;
+            color: white;
+        }
+
+        .event-title, .news-title {
             font-size: 1.5em;
             color: #ff6600;
             margin-bottom: 10px;
         }
 
-        .event-description {
+        .event-description, .news-content {
             color: #666;
             margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .event-date, .news-date {
+            color: #999;
+            font-size: 0.9em;
+            margin-bottom: 10px;
         }
 
         .event-timer {
             font-weight: bold;
             color: #ff6600;
+            margin-top: 10px;
         }
 
-        .no-events {
+        .no-content {
             text-align: center;
             padding: 50px;
             color: #666;
             font-size: 1.2em;
-        }
-
-        /* News */
-        .news-item {
-            background: rgba(255, 255, 255, 0.95);
-            border-left: 4px solid #ff6600;
-            border-radius: 0 10px 10px 0;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-
-        .news-date {
-            color: #999;
-            font-size: 0.9em;
-            margin-bottom: 5px;
-        }
-
-        .news-title {
-            font-size: 1.4em;
-            color: #ff6600;
-            margin-bottom: 10px;
-        }
-
-        .news-content {
-            color: #666;
-            line-height: 1.6;
         }
 
         /* Panel Admin */
@@ -371,170 +397,210 @@
             margin-top: 10px;
         }
 
+        .admin-controls {
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+        }
+
         /* Mobile responsif */
         @media (max-width: 768px) {
-            .nav-links {
-                display: none;
+            .mobile-toggle {
+                display: block;
             }
-            
+
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 80px 20px 20px;
+            }
+
             .welcome-banner h1 {
                 font-size: 2.5em;
             }
-            
-            .nav-container {
-                justify-content: center;
+
+            .welcome-banner {
+                padding: 30px 20px;
+            }
+
+            .section-card {
+                padding: 20px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+
+            .admin-panel {
+                padding: 20px;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Navbar -->
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="logo-nav">
+    <div class="app-container">
+        <!-- Bouton toggle mobile -->
+        <button class="mobile-toggle" onclick="toggleSidebar()">☰</button>
+
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar" id="sidebar">
+            <div class="logo-section">
                 <div class="logo-icon">🐦</div>
                 <div class="logo-text">BRAWL NEST</div>
             </div>
-            <ul class="nav-links">
-                <li><a href="#" onclick="showSection('home')" class="active">🏠 Accueil</a></li>
+            <ul class="nav-menu">
+                <li><a href="#" onclick="showSection('home')" class="active" id="nav-home">🏠 Accueil</a></li>
                 <li><a href="#" onclick="showSection('events')" id="nav-events">🎮 Événements</a></li>
                 <li><a href="#" onclick="showSection('news')" id="nav-news">📰 News</a></li>
                 <li><a href="#" onclick="showSection('discord')" id="nav-discord">💬 Discord</a></li>
                 <li><a href="#" onclick="showSection('admin')" id="nav-admin">⚙️ Admin</a></li>
             </ul>
-        </div>
-    </nav>
+        </nav>
 
-    <div class="container">
-        <!-- Bouton retour -->
-        <button class="back-button" id="backButton" onclick="goBack()">← Retour à l'accueil</button>
+        <!-- Contenu principal -->
+        <main class="main-content" id="mainContent">
+            <!-- Bouton retour -->
+            <button class="back-button" id="backButton" onclick="goBack()">← Retour à l'accueil</button>
 
-        <!-- Section Accueil -->
-        <div id="home" class="content-section active">
-            <div class="welcome-banner">
-                <h1>Bienvenue sur Brawl Nest</h1>
-                <p>Le serveur Discord gaming communautaire ultime !</p>
-                <a href="#" onclick="showSection('discord')" class="cta-button">Rejoindre le Discord</a>
-            </div>
+            <!-- Section Accueil -->
+            <div id="home" class="content-section active">
+                <div class="welcome-banner">
+                    <h1>Bienvenue sur Brawl Nest</h1>
+                    <p>Le serveur Discord gaming communautaire ultime !</p>
+                    <a href="#" onclick="showSection('discord')" class="cta-button">Rejoindre le Discord</a>
+                </div>
 
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-number" id="memberCount">0</div>
-                    <div class="stat-label">Membres</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="onlineCount">0</div>
-                    <div class="stat-label">En ligne</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="eventCount">0</div>
-                    <div class="stat-label">Événements</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="newsCount">0</div>
-                    <div class="stat-label">News</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Section Événements -->
-        <div id="events" class="content-section">
-            <div class="section-card">
-                <h2 class="section-title">🎮 Événements</h2>
-                <div class="events-container" id="eventsContainer">
-                    <div class="no-events">
-                        <p>Aucun événement pour le moment.<br>Revenez plus tard ou contactez les administrateurs !</p>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="memberCount">0</div>
+                        <div class="stat-label">Membres</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="onlineCount">0</div>
+                        <div class="stat-label">En ligne</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="eventCount">0</div>
+                        <div class="stat-label">Événements</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="newsCount">0</div>
+                        <div class="stat-label">News</div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Section News -->
-        <div id="news" class="content-section">
-            <div class="section-card">
-                <h2 class="section-title">📰 News du serveur</h2>
-                <div id="newsContainer">
-                    <div class="no-events">
-                        <p>Aucune news pour le moment.<br>Restez connectés pour les dernières actualités !</p>
+            <!-- Section Événements -->
+            <div id="events" class="content-section">
+                <div class="section-card">
+                    <h2 class="section-title">🎮 Événements</h2>
+                    <div class="events-container" id="eventsContainer">
+                        <div class="no-content">
+                            <p>Aucun événement pour le moment.<br>Revenez plus tard ou contactez les administrateurs !</p>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Section Discord -->
-        <div id="discord" class="content-section">
-            <div class="section-card">
-                <h2 class="section-title">💬 Rejoindre Discord</h2>
-                <div style="text-align: center;">
-                    <p style="font-size: 1.2em; margin-bottom: 30px;">
-                        Rejoignez notre communauté Discord pour participer aux événements, 
-                        discuter avec d'autres gamers et rester au courant des dernières news !
-                    </p>
-                    <button class="cta-button" onclick="joinDiscord()">
-                        🎮 Rejoindre le serveur Discord
-                    </button>
+            <!-- Section News -->
+            <div id="news" class="content-section">
+                <div class="section-card">
+                    <h2 class="section-title">📰 News du serveur</h2>
+                    <div class="news-container" id="newsContainer">
+                        <div class="no-content">
+                            <p>Aucune news pour le moment.<br>Restez connectés pour les dernières actualités !</p>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Section Admin -->
-        <div id="admin" class="content-section">
-            <div class="admin-panel">
-                <h2 class="section-title">⚙️ Panel Administrateur</h2>
-                
-                <div class="admin-login" id="adminLogin">
-                    <div class="form-group">
-                        <input type="password" id="adminCode" placeholder="Code d'accès administrateur">
+            <!-- Section Discord -->
+            <div id="discord" class="content-section">
+                <div class="section-card">
+                    <h2 class="section-title">💬 Rejoindre Discord</h2>
+                    <div style="text-align: center;">
+                        <p style="font-size: 1.2em; margin-bottom: 30px;">
+                            Rejoignez notre communauté Discord pour participer aux événements, 
+                            discuter avec d'autres gamers et rester au courant des dernières news !
+                        </p>
+                        <button class="cta-button" onclick="joinDiscord()">
+                            🎮 Rejoindre le serveur Discord
+                        </button>
                     </div>
-                    <button class="btn" onclick="adminLogin()">Se connecter</button>
-                    <div class="error" id="loginError"></div>
-                </div>
-
-                <div class="admin-form" id="adminForm">
-                    <h3>Ajouter un événement</h3>
-                    <div class="form-group">
-                        <label>Titre de l'événement</label>
-                        <input type="text" id="eventTitle" placeholder="Ex: Tournoi Brawl Stars">
-                    </div>
-                    <div class="form-group">
-                        <label>Description</label>
-                        <textarea id="eventDescription" rows="3" placeholder="Description de l'événement..."></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Statut</label>
-                        <select id="eventStatus">
-                            <option value="upcoming">À venir</option>
-                            <option value="ongoing">En cours</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Durée (en minutes)</label>
-                        <input type="number" id="eventDuration" placeholder="120" min="1">
-                    </div>
-                    <button class="btn" onclick="addEvent()">Ajouter l'événement</button>
-
-                    <hr style="margin: 30px 0;">
-
-                    <h3>Ajouter une news</h3>
-                    <div class="form-group">
-                        <label>Titre de la news</label>
-                        <input type="text" id="newsTitle" placeholder="Titre de la news">
-                    </div>
-                    <div class="form-group">
-                        <label>Contenu</label>
-                        <textarea id="newsContent" rows="4" placeholder="Contenu de la news..."></textarea>
-                    </div>
-                    <button class="btn" onclick="addNews()">Publier la news</button>
-
-                    <hr style="margin: 30px 0;">
-
-                    <h3>Gestion</h3>
-                    <button class="btn btn-danger" onclick="clearEvents()">Effacer tous les événements</button>
-                    <button class="btn btn-danger" onclick="clearNews()">Effacer toutes les news</button>
-                    <button class="btn btn-secondary" onclick="adminLogout()">Déconnexion</button>
                 </div>
             </div>
-        </div>
+
+            <!-- Section Admin -->
+            <div id="admin" class="content-section">
+                <div class="admin-panel">
+                    <h2 class="section-title">⚙️ Panel Administrateur</h2>
+                    
+                    <div class="admin-login" id="adminLogin">
+                        <div class="form-group">
+                            <input type="password" id="adminCode" placeholder="Code d'accès administrateur">
+                        </div>
+                        <button class="btn" onclick="adminLogin()">Se connecter</button>
+                        <div class="error" id="loginError"></div>
+                    </div>
+
+                    <div class="admin-form" id="adminForm">
+                        <h3>Ajouter un événement</h3>
+                        <div class="form-group">
+                            <label>Titre de l'événement</label>
+                            <input type="text" id="eventTitle" placeholder="Ex: Tournoi Brawl Stars">
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <textarea id="eventDescription" rows="3" placeholder="Description de l'événement..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Date et heure de l'événement</label>
+                            <input type="datetime-local" id="eventDateTime">
+                        </div>
+                        <div class="form-group">
+                            <label>Statut</label>
+                            <select id="eventStatus">
+                                <option value="upcoming">À venir</option>
+                                <option value="ongoing">En cours</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Durée (en minutes)</label>
+                            <input type="number" id="eventDuration" placeholder="120" min="1">
+                        </div>
+                        <button class="btn" onclick="addEvent()">Ajouter l'événement</button>
+
+                        <hr style="margin: 30px 0;">
+
+                        <h3>Ajouter une news</h3>
+                        <div class="form-group">
+                            <label>Titre de la news</label>
+                            <input type="text" id="newsTitle" placeholder="Titre de la news">
+                        </div>
+                        <div class="form-group">
+                            <label>Contenu</label>
+                            <textarea id="newsContent" rows="4" placeholder="Contenu de la news..."></textarea>
+                        </div>
+                        <button class="btn" onclick="addNews()">Publier la news</button>
+
+                        <hr style="margin: 30px 0;">
+
+                        <h3>Gestion</h3>
+                        <button class="btn btn-danger" onclick="clearEvents()">Effacer tous les événements</button>
+                        <button class="btn btn-danger" onclick="clearNews()">Effacer toutes les news</button>
+                        <button class="btn btn-secondary" onclick="adminLogout()">Déconnexion</button>
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
 
     <script>
@@ -546,6 +612,9 @@
 
         // Navigation
         function showSection(sectionName) {
+            // Fermer la sidebar sur mobile
+            closeSidebar();
+
             // Masquer toutes les sections
             document.querySelectorAll('.content-section').forEach(section => {
                 section.classList.remove('active');
@@ -555,12 +624,11 @@
             document.getElementById(sectionName).classList.add('active');
 
             // Mettre à jour la navbar
-            document.querySelectorAll('.nav-links a').forEach(link => {
+            document.querySelectorAll('.nav-menu a').forEach(link => {
                 link.classList.remove('active');
             });
             
-            // Trouver le bon lien et le marquer comme actif
-            const targetLink = document.getElementById(`nav-${sectionName}`) || document.querySelector(`[onclick="showSection('${sectionName}')"]`);
+            const targetLink = document.getElementById(`nav-${sectionName}`);
             if (targetLink) {
                 targetLink.classList.add('active');
             }
@@ -580,6 +648,17 @@
             showSection('home');
         }
 
+        // Sidebar mobile
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('mobile-open');
+        }
+
+        function closeSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.remove('mobile-open');
+        }
+
         // Admin
         function adminLogin() {
             const code = document.getElementById('adminCode').value;
@@ -590,6 +669,10 @@
                 document.getElementById('adminLogin').style.display = 'none';
                 document.getElementById('adminForm').style.display = 'block';
                 errorDiv.textContent = '';
+                
+                // Rafraîchir l'affichage pour montrer les boutons de suppression
+                displayEvents();
+                displayNews();
             } else {
                 errorDiv.textContent = 'Code incorrect !';
             }
@@ -600,6 +683,10 @@
             document.getElementById('adminLogin').style.display = 'block';
             document.getElementById('adminForm').style.display = 'none';
             document.getElementById('adminCode').value = '';
+            
+            // Masquer les boutons de suppression
+            displayEvents();
+            displayNews();
         }
 
         // Événements
@@ -608,26 +695,194 @@
 
             const title = document.getElementById('eventTitle').value;
             const description = document.getElementById('eventDescription').value;
+            const dateTime = document.getElementById('eventDateTime').value;
             const status = document.getElementById('eventStatus').value;
             const duration = parseInt(document.getElementById('eventDuration').value);
 
-            if (!title || !description || !duration) {
+            if (!title || !description || !dateTime || !duration) {
                 alert('Veuillez remplir tous les champs !');
                 return;
             }
 
+            const eventDate = new Date(dateTime);
             const event = {
                 id: Date.now(),
                 title: title,
                 description: description,
+                date: eventDate,
                 status: status,
                 duration: duration,
                 createdAt: new Date(),
-                endTime: new Date(Date.now() + duration * 60000)
+                endTime: status === 'ongoing' ? new Date(Date.now() + duration * 60000) : new Date(eventDate.getTime() + duration * 60000)
             };
 
             events.push(event);
+            saveEvents();
             displayEvents();
+            updateStats();
+
+            // Réinitialiser le formulaire
+            document.getElementById('eventTitle').value = '';
+            document.getElementById('eventDescription').value = '';
+            document.getElementById('eventDateTime').value = '';
+            document.getElementById('eventDuration').value = '';
+
+            if (status === 'ongoing') {
+                startEventTimer(event);
+            }
+
+            alert('Événement ajouté avec succès !');
+        }
+
+        function startEventTimer(event) {
+            eventTimers[event.id] = setInterval(() => {
+                const now = new Date();
+                const timeLeft = event.endTime - now;
+
+                if (timeLeft <= 0) {
+                    // Marquer l'événement comme terminé
+                    const eventIndex = events.findIndex(e => e.id === event.id);
+                    if (eventIndex !== -1) {
+                        events[eventIndex].status = 'finished';
+                        saveEvents();
+                    }
+                    
+                    clearInterval(eventTimers[event.id]);
+                    delete eventTimers[event.id];
+                    displayEvents();
+                    updateStats();
+                } else {
+                    const hours = Math.floor(timeLeft / 3600000);
+                    const minutes = Math.floor((timeLeft % 3600000) / 60000);
+                    const seconds = Math.floor((timeLeft % 60000) / 1000);
+                    const timerElement = document.getElementById(`timer-${event.id}`);
+                    if (timerElement) {
+                        timerElement.textContent = `Temps restant: ${hours}h ${minutes}m ${seconds}s`;
+                    }
+                }
+            }, 1000);
+        }
+
+        function displayEvents() {
+            const container = document.getElementById('eventsContainer');
+            
+            if (events.length === 0) {
+                container.innerHTML = `
+                    <div class="no-content">
+                        <p>Aucun événement pour le moment.<br>Revenez plus tard ou contactez les administrateurs !</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Trier les événements par date (plus récents en premier)
+            const sortedEvents = [...events].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            container.innerHTML = sortedEvents.map(event => {
+                let statusClass, statusText;
+                
+                switch(event.status) {
+                    case 'ongoing':
+                        statusClass = 'status-ongoing';
+                        statusText = 'En cours';
+                        break;
+                    case 'finished':
+                        statusClass = 'status-finished';
+                        statusText = 'Terminé';
+                        break;
+                    default:
+                        statusClass = 'status-upcoming';
+                        statusText = 'À venir';
+                }
+                
+                let timerHtml = '';
+                if (event.status === 'ongoing') {
+                    const now = new Date();
+                    const timeLeft = event.endTime - now;
+                    if (timeLeft > 0) {
+                        const hours = Math.floor(timeLeft / 3600000);
+                        const minutes = Math.floor((timeLeft % 3600000) / 60000);
+                        const seconds = Math.floor((timeLeft % 60000) / 1000);
+                        timerHtml = `<div class="event-timer" id="timer-${event.id}">Temps restant: ${hours}h ${minutes}m ${seconds}s</div>`;
+                        
+                        // Redémarrer le timer si nécessaire
+                        setTimeout(() => {
+                            if (!eventTimers[event.id]) {
+                                startEventTimer(event);
+                            }
+                        }, 100);
+                    }
+                }
+
+                return `
+                    <div class="event-card">
+                        <div class="event-status ${statusClass}">${statusText}</div>
+                        <div class="event-date">${new Date(event.date).toLocaleDateString('fr-FR')} à ${new Date(event.date).toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})}</div>
+                        <div class="event-title">${event.title}</div>
+                        <div class="event-description">${event.description}</div>
+                        ${timerHtml}
+                        ${isAdmin ? `
+                            <div class="admin-controls">
+                                <button class="btn btn-danger" onclick="removeEvent(${event.id})">Supprimer</button>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function removeEvent(eventId) {
+            if (!isAdmin) return;
+            
+            if (confirm('Êtes-vous sûr de vouloir supprimer cet événement ?')) {
+                events = events.filter(e => e.id !== eventId);
+                if (eventTimers[eventId]) {
+                    clearInterval(eventTimers[eventId]);
+                    delete eventTimers[eventId];
+                }
+                saveEvents();
+                displayEvents();
+                updateStats();
+            }
+        }
+
+        function clearEvents() {
+            if (!isAdmin) return;
+            
+            if (confirm('Êtes-vous sûr de vouloir supprimer tous les événements ?')) {
+                events = [];
+                Object.keys(eventTimers).forEach(id => {
+                    clearInterval(eventTimers[id]);
+                });
+                eventTimers = {};
+                saveEvents();
+                displayEvents();
+                updateStats();
+            }
+        }
+
+        // News
+        function addNews() {
+            if (!isAdmin) return;
+
+            const title = document.getElementById('newsTitle').value;
+            const content = document.getElementById('newsContent').value;
+
+            if (!title || !content) {
+                alert('Veuillez remplir tous les champs !');
+                return;
+            }
+
+            const newsItem = {
+                id: Date.now(),
+                title: title,
+                content: content,
+                date: new Date()
+            };
+
+            news.unshift(newsItem);
+            saveNews();
+            displayNews();
             updateStats();
 
             // Réinitialiser le formulaire
@@ -642,7 +897,7 @@
             
             if (news.length === 0) {
                 container.innerHTML = `
-                    <div class="no-events">
+                    <div class="no-content">
                         <p>Aucune news pour le moment.<br>Restez connectés pour les dernières actualités !</p>
                     </div>
                 `;
@@ -651,19 +906,27 @@
 
             container.innerHTML = news.map(item => `
                 <div class="news-item">
-                    <div class="news-date">${item.date.toLocaleDateString('fr-FR')}</div>
+                    <div class="news-date">${new Date(item.date).toLocaleDateString('fr-FR')} à ${new Date(item.date).toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})}</div>
                     <div class="news-title">${item.title}</div>
                     <div class="news-content">${item.content}</div>
-                    ${isAdmin ? `<button class="btn btn-danger" onclick="removeNews(${item.id})" style="margin-top: 15px;">Supprimer</button>` : ''}
+                    ${isAdmin ? `
+                        <div class="admin-controls">
+                            <button class="btn btn-danger" onclick="removeNews(${item.id})">Supprimer</button>
+                        </div>
+                    ` : ''}
                 </div>
             `).join('');
         }
 
         function removeNews(newsId) {
             if (!isAdmin) return;
-            news = news.filter(n => n.id !== newsId);
-            displayNews();
-            updateStats();
+            
+            if (confirm('Êtes-vous sûr de vouloir supprimer cette news ?')) {
+                news = news.filter(n => n.id !== newsId);
+                saveNews();
+                displayNews();
+                updateStats();
+            }
         }
 
         function clearNews() {
@@ -671,8 +934,35 @@
             
             if (confirm('Êtes-vous sûr de vouloir supprimer toutes les news ?')) {
                 news = [];
+                saveNews();
                 displayNews();
                 updateStats();
+            }
+        }
+
+        // Sauvegarde en mémoire (simulation)
+        function saveEvents() {
+            // En production, utilisez une vraie base de données
+            console.log('Événements sauvegardés:', events);
+        }
+
+        function saveNews() {
+            // En production, utilisez une vraie base de données
+            console.log('News sauvegardées:', news);
+        }
+
+        function loadData() {
+            // Données de démonstration pour montrer le fonctionnement
+            if (events.length === 0) {
+                events = [
+                    {
+                ];
+            }
+        }
+            if (news.length === 0) {
+                news = [
+                    {
+                ];
             }
         }
 
@@ -686,15 +976,50 @@
             window.open('https://discord.gg/votre-invitation', '_blank');
         }
 
+        // Vérifier les événements en cours au chargement
+        function checkOngoingEvents() {
+            events.forEach(event => {
+                if (event.status === 'ongoing') {
+                    const now = new Date();
+                    const timeLeft = event.endTime - now;
+                    
+                    if (timeLeft > 0) {
+                        startEventTimer(event);
+                    } else {
+                        // Marquer comme terminé
+                        event.status = 'finished';
+                        saveEvents();
+                    }
+                }
+            });
+        }
+
         // Initialisation
         document.addEventListener('DOMContentLoaded', function() {
+            loadData();
             displayEvents();
             displayNews();
             updateStats();
+            checkOngoingEvents();
             
             // Stats simulées
             document.getElementById('memberCount').textContent = '1,247';
             document.getElementById('onlineCount').textContent = '89';
+
+            // Fermer la sidebar si on clique ailleurs (mobile)
+            document.addEventListener('click', function(event) {
+                const sidebar = document.getElementById('sidebar');
+                const toggleButton = document.querySelector('.mobile-toggle');
+                
+                if (!sidebar.contains(event.target) && event.target !== toggleButton) {
+                    closeSidebar();
+                }
+            });
+
+            // Définir la date/heure par défaut dans le formulaire
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            document.getElementById('eventDateTime').value = now.toISOString().slice(0,16);
         });
     </script>
 </body>
