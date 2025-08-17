@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Brawl Nest - Serveur Discord</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <img src="assets/logo.png" alt="Logo Brawl Nest" class="logo">
+    <ul>
+      <li><a href="#menu">Menu</a></li>
+      <li><a href="#news">News</a></li>
+      <li><a href="#events">Événements</a></li>
+      <li><a href="#admin">Admin</a></li>
+      <li><a href="javascript:history.back()">Retour</a></li>
+    </ul>
+  </nav>
+
+  <!-- Menu -->
+  <section id="menu">
+    <h1>Bienvenue sur Brawl Nest 🐦</h1>
+    <p>Le serveur Discord officiel Brawl Nest !</p>
+  </section>
+
+  <!-- News -->
+  <section id="news">
+    <h2>📰 News</h2>
+    <div id="news-container">
+      <div class="card">Nouvelle mise à jour du serveur en cours !</div>
+      <div class="card">Rejoignez nos tournois hebdomadaires 🎮</div>
+    </div>
+  </section>
+
+  <!-- Events -->
+  <section id="events">
+    <h2>📅 Événements</h2>
+    <div id="event-list">Aucun événement pour le moment.</div>
+  </section>
+
+  <!-- Admin -->
+  <section id="admin">
+    <h2>⚙️ Admin</h2>
+    <form id="admin-form">
+      <label for="code">Code admin :</label>
+      <input type="password" id="code" required>
+      <label for="title">Titre de l'événement :</label>
+      <input type="text" id="title">
+      <label for="desc">Description :</label>
+      <textarea id="desc"></textarea>
+      <label for="duration">Durée (minutes) :</label>
+      <input type="number" id="duration" min="1">
+      <button type="submit">Créer un événement</button>
+    </form>
+    <p id="admin-msg"></p>
+  </section>
+
+  <script src="script.js"></script>
+</body>
+</html>
