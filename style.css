@@ -1,0 +1,78 @@
+/* Style global */
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background-color: #ff8000;
+  color: #fff;
+  text-align: center;
+}
+
+/* Navbar */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff;
+  padding: 10px 20px;
+  position: sticky;
+  top: 0;
+}
+.navbar ul {
+  list-style: none;
+  display: flex;
+  gap: 20px;
+}
+.navbar ul li a {
+  text-decoration: none;
+  color: #ff8000;
+  font-weight: bold;
+}
+.navbar ul li a:hover {
+  color: #000;
+}
+.logo {
+  height: 40px;
+}
+
+/* Sections */
+section {
+  padding: 40px;
+}
+h1, h2 {
+  color: #fff;
+}
+
+/* Cards */
+.card {
+  background: #fff;
+  color: #ff8000;
+  padding: 15px;
+  margin: 10px auto;
+  border-radius: 10px;
+  max-width: 400px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+}
+
+/* Admin form */
+#admin-form {
+  display: flex;
+  flex-direction: column;
+  max-width: 400px;
+  margin: auto;
+  gap: 10px;
+}
+#admin-form input, #admin-form textarea, #admin-form button {
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+}
+#admin-form button {
+  background: #fff;
+  color: #ff8000;
+  font-weight: bold;
+  cursor: pointer;
+}
+#admin-form button:hover {
+  background: #ff8000;
+  color: #fff;
+}
