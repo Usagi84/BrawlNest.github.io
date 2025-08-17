@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Brawl Nest - Serveur Discord</title>
+  <title>Brawl Nest - Accueil</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,52 +11,44 @@
   <nav class="navbar">
     <img src="assets/logo.png" alt="Logo Brawl Nest" class="logo">
     <ul>
-      <li><a href="#menu">Menu</a></li>
-      <li><a href="#news">News</a></li>
-      <li><a href="#events">Événements</a></li>
-      <li><a href="#admin">Admin</a></li>
-      <li><a href="javascript:history.back()">Retour</a></li>
+      <li><a href="index.html" class="active">Accueil</a></li>
+      <li><a href="news.html">News</a></li>
+      <li><a href="events.html">Événements</a></li>
+      <li><a href="gallery.html">Galerie</a></li>
+      <li><a href="contact.html">Contact</a></li>
+      <li><a href="admin.html">Admin</a></li>
     </ul>
   </nav>
 
-  <!-- Menu -->
-  <section id="menu">
-    <h1>Bienvenue sur Brawl Nest 🐦</h1>
-    <p>Le serveur Discord officiel Brawl Nest !</p>
-  </section>
+  <!-- Hero -->
+  <header class="hero">
+    <h1>Bienvenue sur <span>Brawl Nest 🐦</span></h1>
+    <p>Le serveur Discord où la communauté se rassemble.</p>
+    <a href="https://discord.gg/tonLienIci" target="_blank" class="btn">Rejoindre le Discord</a>
+  </header>
 
-  <!-- News -->
-  <section id="news">
-    <h2>📰 News</h2>
-    <div id="news-container">
-      <div class="card">Nouvelle mise à jour du serveur en cours !</div>
-      <div class="card">Rejoignez nos tournois hebdomadaires 🎮</div>
+  <!-- Section présentation -->
+  <section class="about">
+    <h2>🔥 Pourquoi rejoindre Brawl Nest ?</h2>
+    <div class="cards">
+      <div class="card">
+        <h3>🎮 Tournois & Événements</h3>
+        <p>Participe à des compétitions fun et des tournois épiques !</p>
+      </div>
+      <div class="card">
+        <h3>💬 Communauté active</h3>
+        <p>Rejoins une famille de joueurs toujours prêts à discuter.</p>
+      </div>
+      <div class="card">
+        <h3>📰 News exclusives</h3>
+        <p>Reste à jour avec toutes les nouveautés de notre serveur.</p>
+      </div>
     </div>
   </section>
 
-  <!-- Events -->
-  <section id="events">
-    <h2>📅 Événements</h2>
-    <div id="event-list">Aucun événement pour le moment.</div>
-  </section>
-
-  <!-- Admin -->
-  <section id="admin">
-    <h2>⚙️ Admin</h2>
-    <form id="admin-form">
-      <label for="code">Code admin :</label>
-      <input type="password" id="code" required>
-      <label for="title">Titre de l'événement :</label>
-      <input type="text" id="title">
-      <label for="desc">Description :</label>
-      <textarea id="desc"></textarea>
-      <label for="duration">Durée (minutes) :</label>
-      <input type="number" id="duration" min="1">
-      <button type="submit">Créer un événement</button>
-    </form>
-    <p id="admin-msg"></p>
-  </section>
-
-  <script src="script.js"></script>
+  <!-- Footer -->
+  <footer>
+    <p>&copy; 2025 Brawl Nest - Tous droits réservés.</p>
+  </footer>
 </body>
 </html>
