@@ -1,259 +1,649 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Brawl Nest</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!--
+    Brawl Nest – Site vitrine monofichier
+    - Navbar horizontale avec logo (oiseau) + hamburger mobile
+    - Pages: Menu / News / Événements / Admin / Retour
+    - Admin protégé par code (2005)
+    - Création d'événements (durée en minutes) avec minuteur et expiration auto
+    - Création de news
+    - Persistance locale (localStorage) pour news et événements (jusqu'à expiration)
+    - Aucune donnée côté serveur — prêt pour hébergement GitHub Pages
+    - Design adapté mobile, animations, cartes, focus states
+  -->
   <style>
+    /* =========================
+       Variables & Reset
+    ========================== */
     :root {
-      --orange: #ff7a00;
-      --orange-dark: #d96600;
-      --light: #fffaf3;
-      --dark: #1a1a1a;
+      --bg: #ff7a00;           /* orange principal */
+      --bg-grad-1: #ff7a00;    /* dégradé */
+      --bg-grad-2: #ff9d42;
+      --ink: #151515;          /* texte foncé */
+      --ink-soft: #2b2b2b;
+      --surface: #fff8f0;      /* carte claire */
+      --surface-2: #fff3e5;
+      --accent: #d55f00;       /* boutons/hover */
+      --accent-2: #b94f00;     /* hover plus foncé */
+      --ring: rgba(0,0,0,.15);
+      --ok: #0ea960;
+      --warn: #eab308;
+      --err: #ef4444;
+      --muted: #7a7a7a;
+      --white: #ffffff;
+      --shadow-1: 0 6px 14px rgba(0,0,0,.16);
+      --shadow-2: 0 10px 24px rgba(0,0,0,.22);
+      --radius: 16px;
+      --radius-sm: 12px;
+      --radius-lg: 24px;
+      --nav-h: 64px;
+      --container: 1100px;
+      --transition: .2s ease;
     }
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
     body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background: linear-gradient(135deg, var(--orange), #ff9b3d);
-      color: var(--dark);
-      line-height: 1.5;
-      min-height: 100vh;
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      color: var(--ink);
+      background: linear-gradient(135deg, var(--bg-grad-1), var(--bg-grad-2));
+      background-attachment: fixed;
+      line-height: 1.45;
     }
+    img { max-width: 100%; display: block; }
+    button, input, textarea, select { font: inherit; }
+    a { color: inherit; }
 
-    /* NAVBAR */
+    /* =========================
+       Layout: Navbar
+    ========================== */
     header {
-      background: var(--orange-dark);
-      color: white;
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      height: var(--nav-h);
+      position: sticky; top: 0; z-index: 1000;
+      background: color-mix(in srgb, var(--accent) 88%, black 0%);
+      box-shadow: var(--shadow-1);
+      backdrop-filter: saturate(140%) blur(6px);
     }
-    nav {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      max-width: 1100px;
-      margin: auto;
-      padding: 12px 20px;
+    .nav { max-width: var(--container); margin: 0 auto; height: 100%; padding: 0 16px;
+      display: flex; align-items: center; justify-content: space-between; }
+    .brand { display: flex; align-items: center; gap: 10px; color: var(--white); font-weight: 800; }
+    .brand .logo {
+      width: 36px; height: 36px; display: grid; place-items: center;
+      background: radial-gradient(circle at 30% 30%, #ffd4a8, #ffad66 60%, #ff8a1f 100%);
+      border-radius: 50%; box-shadow: inset 0 0 0 2px rgba(255,255,255,.35);
     }
-    nav .logo {
-      font-size: 1.5em;
-      font-weight: bold;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    nav .logo span {
-      font-size: 1.2em;
-    }
-    nav ul {
-      display: flex;
-      list-style: none;
-      gap: 25px;
-    }
-    nav a {
-      color: white;
-      text-decoration: none;
-      font-weight: 600;
-      position: relative;
-      transition: 0.3s;
-    }
-    nav a::after {
-      content: "";
-      position: absolute;
-      width: 0%;
-      height: 2px;
-      background: white;
-      left: 0;
-      bottom: -4px;
-      transition: 0.3s;
-    }
-    nav a:hover::after {
-      width: 100%;
-    }
+    .brand .name { letter-spacing: .4px; font-size: 1.1rem; }
 
-    /* Hamburger (mobile) */
-    .hamburger {
-      display: none;
-      flex-direction: column;
-      gap: 5px;
-      cursor: pointer;
+    .navlinks { display: flex; align-items: center; gap: 22px; }
+    .navlinks a {
+      color: var(--white); text-decoration: none; font-weight: 700; position: relative; padding: 6px 2px;
     }
-    .hamburger div {
-      width: 25px;
-      height: 3px;
-      background: white;
-      border-radius: 2px;
+    .navlinks a::after {
+      content: ""; position: absolute; left: 0; bottom: -4px; height: 2px; width: 0%; background: var(--white);
+      transition: width var(--transition);
     }
-    @media (max-width: 768px) {
-      nav ul {
-        display: none;
-        flex-direction: column;
-        background: var(--orange-dark);
-        position: absolute;
-        top: 60px;
-        right: 20px;
-        padding: 15px;
-        border-radius: 10px;
-      }
-      nav ul.active {
-        display: flex;
-      }
-      .hamburger {
-        display: flex;
-      }
-    }
+    .navlinks a:hover::after, .navlinks a.active::after { width: 100%; }
 
-    /* MAIN CONTENT */
-    main {
-      max-width: 900px;
-      margin: auto;
-      padding: 20px;
-      margin-top: 20px;
-    }
-    h1 {
-      margin-bottom: 15px;
-    }
+    .hamburger { display: none; width: 36px; height: 36px; padding: 8px; border-radius: 10px; cursor: pointer; }
+    .hamburger:focus-visible { outline: 3px solid var(--white); outline-offset: 2px; }
+    .hamburger span { display: block; width: 100%; height: 3px; background: var(--white); border-radius: 2px; }
+    .hamburger span + span { margin-top: 5px; }
 
+    /* Mobile menu */
+    .mobile-menu {
+      position: fixed; inset: var(--nav-h) 0 auto 0; background: color-mix(in srgb, var(--accent) 93%, black 0%);
+      display: none; flex-direction: column; padding: 12px; gap: 8px; box-shadow: var(--shadow-2);
+    }
+    .mobile-menu a { color: var(--white); text-decoration: none; font-weight: 700; padding: 12px; border-radius: 12px; }
+    .mobile-menu a:hover { background: rgba(255,255,255,.12); }
+    .mobile-menu.show { display: flex; }
+
+    /* =========================
+       Containers & Sections
+    ========================== */
+    .container { max-width: var(--container); margin: 0 auto; padding: 22px 16px; }
+
+    .hero {
+      display: grid; gap: 16px; grid-template-columns: 1.1fr .9fr; align-items: center; margin-top: 14px;
+    }
+    .hero .panel {
+      background: linear-gradient(180deg, var(--surface), var(--surface-2)); border-radius: var(--radius);
+      padding: 22px; box-shadow: var(--shadow-2);
+    }
+    .title { font-size: clamp(1.5rem, 1rem + 2vw, 2.2rem); font-weight: 900; letter-spacing: .4px; }
+    .subtitle { color: var(--ink-soft); margin-top: 6px; }
+
+    .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 16px; }
+    .kpi { background: var(--surface); border-radius: var(--radius-sm); padding: 16px; box-shadow: var(--shadow-1); text-align: center; }
+    .kpi .v { font-size: 1.4rem; font-weight: 900; }
+    .kpi .l { color: var(--muted); font-weight: 700; font-size: .92rem; }
+
+    /* Cards */
+    .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
+    .col-12 { grid-column: span 12; }
+    .col-6 { grid-column: span 6; }
     .card {
-      background: var(--light);
-      padding: 20px;
-      border-radius: 15px;
-      margin: 20px 0;
-      box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-      transition: transform 0.2s, box-shadow 0.2s;
+      background: var(--surface); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow-1);
+      transition: transform var(--transition), box-shadow var(--transition);
     }
-    .card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 18px rgba(0,0,0,0.25);
-    }
+    .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-2); }
 
-    input, button {
-      padding: 12px;
-      margin: 8px 0;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-      width: 100%;
-      max-width: 400px;
-      font-size: 1em;
-    }
-    button {
-      background: var(--orange-dark);
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-      border: none;
-      transition: 0.2s;
-    }
-    button:hover {
-      background: #b75200;
-    }
+    .section-title { font-size: 1.35rem; font-weight: 900; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+    .muted { color: var(--muted); font-size: .95rem; }
 
-    .hidden { display: none; }
+    /* Buttons */
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 12px; border: none; cursor: pointer; font-weight: 800; }
+    .btn-primary { background: var(--accent); color: var(--white); }
+    .btn-primary:hover { background: var(--accent-2); }
+    .btn-ghost { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 2px rgba(0,0,0,.1); }
+    .btn-ghost:hover { background: rgba(0,0,0,.04); }
+
+    /* Forms */
+    .form { display: grid; gap: 10px; margin-top: 10px; }
+    .field { display: grid; gap: 6px; }
+    label { font-weight: 700; }
+    input[type="text"], input[type="number"], input[type="password"], textarea {
+      padding: 12px 14px; border-radius: 12px; border: 2px solid rgba(0,0,0,.08); background: #fff; outline: none;
+      transition: border var(--transition), box-shadow var(--transition);
+    }
+    textarea { min-height: 90px; resize: vertical; }
+    input:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(213,95,0,.15); }
+
+    /* Lists */
+    .list { display: grid; gap: 12px; }
+    .item { background: #fff; border-radius: 14px; padding: 14px; box-shadow: var(--shadow-1); display: grid; gap: 6px; }
+    .item .title { font-size: 1.05rem; }
+    .tag { display: inline-flex; align-items: center; gap: 6px; font-size: .82rem; padding: 4px 8px; border-radius: 999px; }
+    .tag.ok { background: #e9f8f0; color: #0a7c47; }
+    .tag.warn { background: #fff7db; color: #8a6b00; }
+    .tag.err { background: #ffe7e7; color: #a70f0f; }
+
+    /* Empty state */
+    .empty { text-align: center; padding: 20px; color: var(--muted); font-weight: 700; }
+
+    /* Footer */
+    footer { padding: 28px 16px; text-align: center; color: var(--white); font-weight: 700; opacity: .9; }
+
+    /* Back button (Retour) sticky bottom-right on mobile */
+    .back-fab { position: fixed; right: 14px; bottom: 14px; z-index: 900; }
+
+    /* Dialog/Toast */
+    .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: 24px; background: #111; color: #fff; padding: 10px 14px; border-radius: 999px; box-shadow: var(--shadow-2); opacity: 0; pointer-events: none; transition: opacity .25s ease, transform .25s ease; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(-4px); }
+
+    /* Responsive */
+    @media (max-width: 980px) {
+      .hero { grid-template-columns: 1fr; }
+      .kpis { grid-template-columns: repeat(3, 1fr); }
+      .col-6 { grid-column: span 12; }
+    }
+    @media (max-width: 720px) {
+      .navlinks { display: none; }
+      .hamburger { display: grid; place-items: center; }
+      .kpis { grid-template-columns: 1fr 1fr 1fr; }
+    }
+    @media (max-width: 520px) {
+      .kpis { grid-template-columns: 1fr 1fr; }
+    }
   </style>
 </head>
 <body>
-  <!-- NAVBAR -->
+  <!-- ========================= Navbar ========================= -->
   <header>
-    <nav>
-      <div class="logo">🐦 <span>Brawl Nest</span></div>
-      <ul id="nav-links">
-        <li><a href="#" onclick="showPage('menu')">Menu</a></li>
-        <li><a href="#" onclick="showPage('news')">News</a></li>
-        <li><a href="#" onclick="showPage('events')">Événements</a></li>
-        <li><a href="#" onclick="showPage('admin')">Admin</a></li>
-        <li><a href="#" onclick="showPage('menu')">Retour</a></li>
-      </ul>
-      <div class="hamburger" onclick="toggleMenu()">
-        <div></div><div></div><div></div>
+    <div class="nav">
+      <div class="brand" aria-label="Brawl Nest">
+        <div class="logo" aria-hidden="true" title="Brawl Nest">
+          <!-- Simple oiseau en SVG stylisé (pas un aigle) -->
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M3 12c5-1 7-5 8-9 2 5 6 7 10 7-4 2-8 7-8 12-2-3-4-6-10-10z" fill="#fff"/>
+          </svg>
+        </div>
+        <div class="name">Brawl Nest</div>
       </div>
-    </nav>
+      <nav class="navlinks" aria-label="Navigation principale">
+        <a href="#" data-link="menu" class="active">Menu</a>
+        <a href="#" data-link="news">News</a>
+        <a href="#" data-link="events">Événements</a>
+        <a href="#" data-link="admin">Admin</a>
+        <a href="#" data-link="retour">Retour</a>
+      </nav>
+      <button class="hamburger" id="hamburger" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobileMenu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+    <div class="mobile-menu" id="mobileMenu" role="dialog" aria-modal="true">
+      <a href="#" data-link="menu">Menu</a>
+      <a href="#" data-link="news">News</a>
+      <a href="#" data-link="events">Événements</a>
+      <a href="#" data-link="admin">Admin</a>
+      <a href="#" data-link="retour">Retour</a>
+    </div>
   </header>
 
-  <!-- MAIN -->
+  <!-- ========================= Main ========================= -->
   <main>
-    <!-- Menu -->
-    <section id="menu">
-      <h1>🐦 Bienvenue sur Brawl Nest</h1>
-      <p>Le site officiel de notre serveur Discord !</p>
-      <div class="card">🔥 Rejoins la communauté et découvre nos news et événements exclusifs !</div>
-    </section>
+    <div class="container">
 
-    <!-- News -->
-    <section id="news" class="hidden">
-      <h1>📰 News</h1>
-      <div class="card">⚡ Mise à jour du serveur : nouvelle salle vocale ajoutée !</div>
-      <div class="card">🎉 Concours de création de logo en cours !</div>
-    </section>
+      <!-- Hero / Menu -->
+      <section id="page-menu" class="page">
+        <div class="hero">
+          <div class="panel">
+            <div class="title">🐦 Bienvenue sur Brawl Nest</div>
+            <div class="subtitle">Le site officiel de notre serveur Discord. Reste informé des <b>news</b> et rejoins nos <b>événements</b> en un clic.</div>
+            <div class="kpis">
+              <div class="kpi"><div class="v" id="kpiMembers">—</div><div class="l">Membres</div></div>
+              <div class="kpi"><div class="v" id="kpiNews">—</div><div class="l">News</div></div>
+              <div class="kpi"><div class="v" id="kpiEvents">—</div><div class="l">Événements actifs</div></div>
+            </div>
+            <div style="margin-top:14px; display:flex; gap:10px; flex-wrap: wrap;">
+              <button class="btn btn-primary" data-link="events">Voir les événements</button>
+              <button class="btn btn-ghost" data-link="news">Lire les news</button>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="section-title">À propos</div>
+            <p class="muted">Brawl Nest est une communauté conviviale. Ici, pas d’événements par défaut : <b>rien n’apparaît tant que personne ne crée</b>. Les admins peuvent publier des news et lancer des événements <i>temporaires</i> avec un minuteur.</p>
+            <ul style="margin-top:8px; padding-left: 18px;">
+              <li>Fond orange, style léger et lisible</li>
+              <li>Navbar claire, menu hamburger sur mobile</li>
+              <li>Pas d’aigle — <b>un oiseau</b> simple 🐦</li>
+            </ul>
+          </div>
+        </div>
+      </section>
 
-    <!-- Events -->
-    <section id="events" class="hidden">
-      <h1>📅 Événements</h1>
-      <div id="eventList" class="card">Aucun événement pour le moment.</div>
-    </section>
+      <!-- News -->
+      <section id="page-news" class="page" hidden>
+        <div class="grid">
+          <div class="col-12">
+            <div class="section-title">📰 News du serveur</div>
+            <p class="muted">Les dernières annonces publiées par l'équipe.</p>
+          </div>
 
-    <!-- Admin -->
-    <section id="admin" class="hidden">
-      <h1>🔑 Accès Admin</h1>
-      <div id="adminLogin" class="card">
-        <p>Entre le code secret :</p>
-        <input type="password" id="adminCode" placeholder="Code admin">
-        <button onclick="checkCode()">Valider</button>
-      </div>
-      <div id="adminPanel" class="hidden card">
-        <h2>Créer un événement</h2>
-        <input type="text" id="eventName" placeholder="Nom de l'événement">
-        <input type="number" id="eventDuration" placeholder="Durée (minutes)">
-        <button onclick="addEvent()">Ajouter</button>
-      </div>
-    </section>
+          <div class="col-12 card">
+            <div id="newsList" class="list"></div>
+            <div id="newsEmpty" class="empty">Aucune news pour le moment.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Events -->
+      <section id="page-events" class="page" hidden>
+        <div class="grid">
+          <div class="col-12">
+            <div class="section-title">📅 Événements</div>
+            <p class="muted">En cours et à venir — les expirés disparaissent automatiquement.</p>
+          </div>
+
+          <div class="col-12 card">
+            <div id="eventList" class="list"></div>
+            <div id="eventsEmpty" class="empty">Aucun événement pour le moment.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Admin -->
+      <section id="page-admin" class="page" hidden>
+        <div class="grid">
+          <div class="col-12 col-6 card">
+            <div class="section-title">🔑 Accès Admin</div>
+            <div id="adminGate">
+              <div class="form" style="max-width:460px;">
+                <div class="field">
+                  <label for="code">Code secret</label>
+                  <input type="password" id="code" placeholder="2005" autocomplete="current-password" />
+                </div>
+                <button class="btn btn-primary" id="btnEnter">Valider</button>
+                <p class="muted">Astuce : le code par défaut est <b>2005</b>. À sécuriser côté serveur si besoin ultérieurement.</p>
+              </div>
+            </div>
+            <div id="adminOk" hidden>
+              <div class="tag ok">Accès accordé</div>
+              <div class="muted" style="margin-top:6px;">Tu peux publier des <b>news</b> et créer des <b>événements</b>.</div>
+            </div>
+          </div>
+
+          <div class="col-12 col-6 card" id="adminNews" hidden>
+            <div class="section-title">📝 Publier une news</div>
+            <form class="form" id="newsForm">
+              <div class="field">
+                <label for="newsTitle">Titre</label>
+                <input type="text" id="newsTitle" placeholder="Ex.: Nouvelle salle vocale" />
+              </div>
+              <div class="field">
+                <label for="newsBody">Contenu</label>
+                <textarea id="newsBody" placeholder="Détails de l'annonce..."></textarea>
+              </div>
+              <button class="btn btn-primary" type="submit">Publier</button>
+            </form>
+          </div>
+
+          <div class="col-12 card" id="adminEvents" hidden>
+            <div class="section-title">🎯 Créer un événement</div>
+            <form class="form" id="eventForm">
+              <div class="grid" style="grid-template-columns: repeat(12, 1fr); gap: 12px;">
+                <div class="col-12 col-6 field">
+                  <label for="eventName">Nom</label>
+                  <input type="text" id="eventName" placeholder="Tournoi 2v2" />
+                </div>
+                <div class="col-12 col-6 field">
+                  <label for="eventMinutes">Durée (minutes)</label>
+                  <input type="number" id="eventMinutes" placeholder="Ex.: 45" min="1" />
+                </div>
+                <div class="col-12 field">
+                  <label for="eventDetails">Détails</label>
+                  <textarea id="eventDetails" placeholder="Infos, règles, récompenses..."></textarea>
+                </div>
+              </div>
+              <div style="display:flex; gap:10px; flex-wrap: wrap;">
+                <button class="btn btn-primary" type="submit">Créer l'événement</button>
+                <button class="btn btn-ghost" type="button" id="btnClearExpired">Nettoyer les expirés</button>
+              </div>
+              <p class="muted">Les événements expirent automatiquement et disparaissent de la liste publique.</p>
+            </form>
+          </div>
+        </div>
+      </section>
+
+    </div>
   </main>
 
+  <!-- ========================= Footer & Floating Back ========================= -->
+  <button class="btn btn-primary back-fab" data-link="menu" title="Retour au menu">↩️ Retour</button>
+  <footer>🐦 Brawl Nest — communauté Discord</footer>
+
+  <!-- Toast -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- ========================= Scripts ========================= -->
   <script>
-    function showPage(page) {
-      document.querySelectorAll("main section").forEach(sec => sec.classList.add("hidden"));
-      document.getElementById(page).classList.remove("hidden");
-      // fermer menu mobile si ouvert
-      document.getElementById("nav-links").classList.remove("active");
+    // =========================
+    // Utilities
+    // =========================
+    const $ = sel => document.querySelector(sel);
+    const $$ = sel => Array.from(document.querySelectorAll(sel));
+
+    function toast(msg) {
+      const t = $('#toast');
+      t.textContent = msg; t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2200);
     }
 
-    function checkCode() {
-      let code = document.getElementById("adminCode").value;
-      if (code === "2005") {
-        document.getElementById("adminLogin").classList.add("hidden");
-        document.getElementById("adminPanel").classList.remove("hidden");
-      } else {
-        alert("Code incorrect !");
-      }
+    function now() { return Date.now(); }
+    function minutes(ms) { return Math.round(ms / 60000); }
+
+    function humanTime(ms) {
+      const s = Math.max(0, Math.floor(ms/1000));
+      const m = Math.floor(s/60), r = s%60;
+      if (m <= 0) return `${r}s`;
+      return `${m}m ${r}s`;
     }
 
-    function addEvent() {
-      let name = document.getElementById("eventName").value;
-      let duration = parseInt(document.getElementById("eventDuration").value);
-      if (!name || !duration) {
-        alert("Remplis tous les champs !");
+    // =========================
+    // Navigation (SPA)
+    // =========================
+    const pages = {
+      menu: '#page-menu', news: '#page-news', events: '#page-events', admin: '#page-admin'
+    };
+
+    function showPage(key) {
+      Object.values(pages).forEach(sel => {
+        const el = document.querySelector(sel);
+        if (!el) return; el.hidden = true;
+      });
+      const target = document.querySelector(pages[key] || pages.menu);
+      if (target) target.hidden = false;
+
+      // Active link styling
+      $$('.navlinks a').forEach(a => a.classList.toggle('active', a.dataset.link === key));
+
+      // Close mobile menu
+      mobileMenu(false);
+
+      if (key === 'retour') key = 'menu';
+      history.replaceState({}, '', `#${key}`); // URL hash (no reload)
+    }
+
+    // Hash routing (allow direct links)
+    window.addEventListener('load', () => {
+      const h = location.hash.replace('#','');
+      if (pages[h]) showPage(h); else showPage('menu');
+      updateKpis();
+      renderAll();
+    });
+
+    // Navbar links
+    document.addEventListener('click', (e) => {
+      const a = e.target.closest('[data-link]');
+      if (!a) return;
+      e.preventDefault();
+      const key = a.getAttribute('data-link');
+      if (key === 'retour') return showPage('menu');
+      showPage(key);
+    });
+
+    // Hamburger
+    const hb = $('#hamburger');
+    const mm = $('#mobileMenu');
+    function mobileMenu(force) {
+      if (force === true) mm.classList.add('show');
+      else if (force === false) mm.classList.remove('show');
+      else mm.classList.toggle('show');
+      const open = mm.classList.contains('show');
+      hb.setAttribute('aria-expanded', String(open));
+    }
+    hb.addEventListener('click', () => mobileMenu());
+
+    // Close mobile menu when clicking a link
+    mm.addEventListener('click', (e) => {
+      if (e.target.matches('a[data-link]')) mobileMenu(false);
+    });
+
+    // =========================
+    // Storage (localStorage)
+    // =========================
+    const KEY_NEWS = 'bn_news_v1';
+    const KEY_EVENTS = 'bn_events_v1';
+
+    function loadNews() {
+      try { return JSON.parse(localStorage.getItem(KEY_NEWS) || '[]'); } catch { return []; }
+    }
+    function saveNews(list) { localStorage.setItem(KEY_NEWS, JSON.stringify(list)); }
+
+    function loadEvents() {
+      try { return JSON.parse(localStorage.getItem(KEY_EVENTS) || '[]'); } catch { return []; }
+    }
+    function saveEvents(list) { localStorage.setItem(KEY_EVENTS, JSON.stringify(list)); }
+
+    // =========================
+    // News rendering / CRUD (Create only here)
+    // =========================
+    function renderNews() {
+      const list = loadNews();
+      const wrap = $('#newsList');
+      const empty = $('#newsEmpty');
+      wrap.innerHTML = '';
+      if (!list.length) {
+        empty.style.display = 'block';
         return;
       }
-
-      let eventDiv = document.createElement("div");
-      eventDiv.className = "card";
-      eventDiv.textContent = name + " (en cours)";
-      document.getElementById("eventList").innerHTML = "";
-      document.getElementById("eventList").appendChild(eventDiv);
-
-      setTimeout(() => {
-        document.getElementById("eventList").innerHTML = "Aucun événement pour le moment.";
-      }, duration * 60000);
+      empty.style.display = 'none';
+      list.slice().reverse().forEach(n => {
+        const item = document.createElement('article');
+        item.className = 'item';
+        const date = new Date(n.ts).toLocaleString();
+        item.innerHTML = `
+          <div class="title">${escapeHtml(n.title)}</div>
+          <div class="muted">${date}</div>
+          <div>${escapeHtml(n.body)}</div>
+        `;
+        wrap.appendChild(item);
+      });
+      $('#kpiNews').textContent = String(list.length);
     }
 
-    function toggleMenu() {
-      document.getElementById("nav-links").classList.toggle("active");
+    // =========================
+    // Events rendering / timers
+    // =========================
+    let eventTimer = null;
+
+    function renderEvents() {
+      const wrap = $('#eventList');
+      const empty = $('#eventsEmpty');
+      const raw = loadEvents();
+      const nowMs = now();
+      // Filter out expired automatically
+      const list = raw.filter(ev => ev.ends > nowMs);
+      if (list.length !== raw.length) saveEvents(list);
+
+      wrap.innerHTML = '';
+      if (!list.length) {
+        empty.style.display = 'block';
+        $('#kpiEvents').textContent = '0';
+        return;
+      }
+      empty.style.display = 'none';
+
+      list.sort((a,b) => a.ends - b.ends);
+
+      list.forEach(ev => {
+        const timeLeft = Math.max(0, ev.ends - nowMs);
+        const status = timeLeft > 0 ? 'En cours' : 'Terminé';
+        const tagClass = timeLeft > 0 ? 'ok' : 'err';
+        const el = document.createElement('article');
+        el.className = 'item';
+        el.dataset.id = ev.id;
+        el.innerHTML = `
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap: wrap;">
+            <div class="title">${escapeHtml(ev.name)}</div>
+            <div class="tag ${tagClass}">${status}</div>
+          </div>
+          <div class="muted">Expire dans <b class="left" aria-live="polite">${humanTime(timeLeft)}</b></div>
+          <div>${escapeHtml(ev.details || '')}</div>
+        `;
+        wrap.appendChild(el);
+      });
+
+      $('#kpiEvents').textContent = String(list.length);
+
+      // Setup/refresh global timer for countdown updates (every second)
+      if (eventTimer) clearInterval(eventTimer);
+      eventTimer = setInterval(() => {
+        const current = loadEvents();
+        const nowMs2 = now();
+        let changed = false;
+        $$('#eventList .item').forEach((node, idx) => {
+          const id = node.dataset.id;
+          const ev = current.find(e => e.id === id);
+          if (!ev) { changed = true; return; }
+          const leftMs = Math.max(0, ev.ends - nowMs2);
+          const left = node.querySelector('.left');
+          if (left) left.textContent = humanTime(leftMs);
+          if (leftMs <= 0) changed = true;
+        });
+        if (changed) renderEvents();
+      }, 1000);
     }
+
+    function clearExpired() {
+      const list = loadEvents();
+      const kept = list.filter(e => e.ends > now());
+      saveEvents(kept);
+      renderEvents();
+      toast('Événements expirés nettoyés');
+    }
+
+    // =========================
+    // Security-lite: admin gate
+    // =========================
+    const DEFAULT_CODE = '2005';
+    let adminUnlocked = false;
+
+    function unlockAdmin(code) {
+      if (String(code).trim() === DEFAULT_CODE) {
+        adminUnlocked = true;
+        $('#adminGate').hidden = true;
+        $('#adminOk').hidden = false;
+        $('#adminNews').hidden = false;
+        $('#adminEvents').hidden = false;
+        toast('Accès admin accordé');
+      } else {
+        toast('Code incorrect');
+      }
+    }
+
+    // =========================
+    // Forms handlers
+    // =========================
+    $('#btnEnter').addEventListener('click', () => unlockAdmin($('#code').value));
+    $('#code').addEventListener('keydown', (e) => { if (e.key === 'Enter') unlockAdmin(e.target.value); });
+
+    $('#newsForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!adminUnlocked) return toast('Accès admin requis');
+      const title = $('#newsTitle').value.trim();
+      const body = $('#newsBody').value.trim();
+      if (!title || !body) return toast('Remplis le titre et le contenu');
+      const list = loadNews();
+      list.push({ id: uuid(), title, body, ts: now() });
+      saveNews(list);
+      $('#newsTitle').value = '';
+      $('#newsBody').value = '';
+      renderNews();
+      updateKpis();
+      toast('News publiée');
+    });
+
+    $('#eventForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!adminUnlocked) return toast('Accès admin requis');
+      const name = $('#eventName').value.trim();
+      const minutesVal = parseInt($('#eventMinutes').value, 10);
+      const details = $('#eventDetails').value.trim();
+      if (!name) return toast('Nom requis');
+      if (!Number.isFinite(minutesVal) || minutesVal <= 0) return toast('Durée invalide');
+      const start = now();
+      const ends = start + minutesVal * 60000;
+      const list = loadEvents();
+      list.push({ id: uuid(), name, details, start, ends });
+      saveEvents(list);
+      $('#eventName').value = '';
+      $('#eventMinutes').value = '';
+      $('#eventDetails').value = '';
+      renderEvents();
+      updateKpis();
+      toast('Événement créé');
+    });
+
+    $('#btnClearExpired').addEventListener('click', clearExpired);
+
+    // =========================
+    // KPIs & initial data
+    // =========================
+    function updateKpis() {
+      const membersApprox = 120 + (loadNews().length * 2) + loadEvents().length; // simple fake metric
+      $('#kpiMembers').textContent = String(membersApprox);
+      $('#kpiNews').textContent = String(loadNews().length);
+      // events set during renderEvents
+    }
+
+    function renderAll() {
+      renderNews();
+      renderEvents();
+    }
+
+    // =========================
+    // Helpers
+    // =========================
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"]/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[s]));
+    }
+    function uuid(){ return 'id-' + Math.random().toString(36).slice(2,9) + Date.now().toString(36).slice(-4); }
   </script>
 </body>
 </html>
