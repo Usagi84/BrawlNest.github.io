@@ -3,96 +3,158 @@
 <head>
   <meta charset="UTF-8">
   <title>Brawl Nest</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: orange;
-      color: #222;
+    :root {
+      --orange: #ff7a00;
+      --orange-dark: #e06a00;
+      --light: #fff8f0;
+      --dark: #222;
     }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--orange);
+      color: var(--dark);
+      line-height: 1.5;
+    }
+
+    /* Navbar */
     header {
-      background: #ff8800;
-      padding: 10px 20px;
+      background: var(--orange-dark);
+      color: white;
+      padding: 12px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
     }
     nav {
       display: flex;
-      justify-content: center;
-      gap: 30px;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1000px;
+      margin: auto;
+    }
+    nav .logo {
+      font-size: 1.2em;
+      font-weight: bold;
+    }
+    nav ul {
+      display: flex;
+      list-style: none;
+      gap: 20px;
     }
     nav a {
       color: white;
       text-decoration: none;
-      font-weight: bold;
+      font-weight: 600;
+      transition: 0.2s;
     }
     nav a:hover {
       text-decoration: underline;
     }
+
     main {
+      max-width: 900px;
+      margin: auto;
       padding: 20px;
     }
-    .hidden {
-      display: none;
+
+    h1 {
+      margin-bottom: 15px;
     }
-    .event, .news {
-      background: #fff5e6;
-      border-radius: 10px;
+
+    .card {
+      background: var(--light);
       padding: 15px;
+      border-radius: 12px;
       margin: 15px 0;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    input, button {
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      width: 100%;
+      max-width: 400px;
     }
     button {
-      background: #ff8800;
-      border: none;
-      padding: 10px 20px;
+      background: var(--orange-dark);
       color: white;
       font-weight: bold;
-      border-radius: 8px;
       cursor: pointer;
+      border: none;
     }
     button:hover {
-      background: #e07000;
+      background: #c95d00;
     }
+
+    /* Responsive */
+    @media (max-width: 700px) {
+      nav ul {
+        flex-direction: column;
+        gap: 10px;
+        background: var(--orange-dark);
+        padding: 10px;
+        border-radius: 10px;
+      }
+      nav {
+        flex-direction: column;
+        gap: 10px;
+      }
+    }
+
+    .hidden { display: none; }
   </style>
 </head>
 <body>
   <header>
     <nav>
-      <a href="#" onclick="showPage('menu')">Menu</a>
-      <a href="#" onclick="showPage('news')">News</a>
-      <a href="#" onclick="showPage('events')">Événements</a>
-      <a href="#" onclick="showPage('admin')">Admin</a>
-      <a href="#" onclick="showPage('menu')">Retour</a>
+      <div class="logo">🐦 Brawl Nest</div>
+      <ul>
+        <li><a href="#" onclick="showPage('menu')">Menu</a></li>
+        <li><a href="#" onclick="showPage('news')">News</a></li>
+        <li><a href="#" onclick="showPage('events')">Événements</a></li>
+        <li><a href="#" onclick="showPage('admin')">Admin</a></li>
+        <li><a href="#" onclick="showPage('menu')">Retour</a></li>
+      </ul>
     </nav>
   </header>
 
   <main>
-    <!-- Page Menu -->
+    <!-- Menu -->
     <section id="menu">
       <h1>🐦 Bienvenue sur Brawl Nest</h1>
       <p>Le site officiel de notre serveur Discord !</p>
     </section>
 
-    <!-- Page News -->
+    <!-- News -->
     <section id="news" class="hidden">
-      <h1>📰 News du serveur</h1>
-      <div class="news">Nouvelle fonctionnalité sur le serveur !</div>
+      <h1>📰 News</h1>
+      <div class="card">⚡ Mise à jour du serveur : nouvelle salle vocale ajoutée !</div>
     </section>
 
-    <!-- Page Events -->
+    <!-- Events -->
     <section id="events" class="hidden">
       <h1>📅 Événements</h1>
-      <div id="eventList">Aucun événement pour le moment.</div>
+      <div id="eventList" class="card">Aucun événement pour le moment.</div>
     </section>
 
-    <!-- Page Admin -->
+    <!-- Admin -->
     <section id="admin" class="hidden">
       <h1>🔑 Accès Admin</h1>
-      <div id="adminLogin">
-        <p>Entrer le code secret :</p>
+      <div id="adminLogin" class="card">
+        <p>Entre le code secret :</p>
         <input type="password" id="adminCode">
         <button onclick="checkCode()">Valider</button>
       </div>
-      <div id="adminPanel" class="hidden">
+      <div id="adminPanel" class="hidden card">
         <h2>Créer un événement</h2>
         <input type="text" id="eventName" placeholder="Nom de l'événement">
         <input type="number" id="eventDuration" placeholder="Durée (minutes)">
@@ -126,7 +188,7 @@
       }
 
       let eventDiv = document.createElement("div");
-      eventDiv.className = "event";
+      eventDiv.className = "card";
       eventDiv.textContent = name + " (en cours)";
       document.getElementById("eventList").innerHTML = "";
       document.getElementById("eventList").appendChild(eventDiv);
