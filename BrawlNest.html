@@ -1,708 +1,216 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Brawl Nest — Full Stack</title>
-  <!--
-    BRAWL NEST (Full‑stack minimal)
-    ✅ Vrai navbar + mobile hamburger
-    ✅ Events & News partagés pour tout le monde (plus de localStorage)
-    ✅ Back-end API (Cloudflare Workers + KV) fourni ci‑dessous
-    ✅ Expiration automatique des événements côté serveur (TTL)
-    ✅ Admin protégé par code (2005 par défaut, réglable côté serveur)
-    ✅ Prêt pour GitHub Pages (front) + Cloudflare Workers (API)
-
-    🚀 Déploiement résumé
-    1) Déploie l'API (Cloudflare Workers) avec KV (voir bloc "worker.js" plus bas).
-    2) Mets l'URL de ton Worker dans FRONTEND_API_BASE ci‑dessous.
-    3) Héberge ce fichier HTML sur GitHub Pages (ou autre).
-  -->
-  <style>
-    :root{
-      --bg1:#ff7a00;--bg2:#ff9d42;--ink:#111;--ink-soft:#2a2a2a;--surface:#fff8f0;--surface-2:#fff1e0;--accent:#d55f00;--accent-2:#b54f00;--muted:#7a7a7a;--white:#fff;--nav-h:64px;--radius:16px;--radius-sm:12px;--shadow-1:0 6px 14px rgba(0,0,0,.16);--shadow-2:0 10px 24px rgba(0,0,0,.22);--container:1100px;--t:.2s ease
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brawl Nest</title>
+<style>
+    /* ===== Reset & Base ===== */
+    * {margin:0; padding:0; box-sizing:border-box; font-family: Arial, sans-serif;}
+    body {background-color: #ff7f50; color: #fff;}
+    a {text-decoration:none; color: inherit;}
+    button {cursor:pointer; border:none; border-radius:5px; padding:0.5em 1em; background:#fff;color:#ff7f50; font-weight:bold;}
+    /* ===== Navbar ===== */
+    .navbar {display:flex; justify-content:space-between; align-items:center; padding:10px 20px; background:#ff8f40; position:sticky; top:0; z-index:100;}
+    .navbar .logo {display:flex; align-items:center; font-weight:bold; font-size:1.5em;}
+    .navbar .logo img {width:40px; height:40px; margin-right:10px;}
+    .nav-links {display:flex; gap:15px;}
+    .nav-links a {padding:5px 10px; border-radius:5px; transition:0.3s;}
+    .nav-links a:hover {background:rgba(255,255,255,0.2);}
+    .hamburger {display:none; flex-direction:column; cursor:pointer;}
+    .hamburger div {width:25px; height:3px; background:#fff; margin:4px 0;}
+    /* ===== Responsive ===== */
+    @media(max-width:768px){
+        .nav-links {display:none; flex-direction:column; background:#ff8f40; position:absolute; top:60px; left:0; width:100%; padding:10px 0;}
+        .nav-links.active {display:flex;}
+        .hamburger {display:flex;}
     }
-    *{box-sizing:border-box}html,body{height:100%}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Helvetica Neue,Arial;color:var(--ink);background:linear-gradient(135deg,var(--bg1),var(--bg2));background-attachment:fixed;line-height:1.45}
-    header{height:var(--nav-h);position:sticky;top:0;z-index:1000;background:color-mix(in srgb,var(--accent) 88%,black 0%);box-shadow:var(--shadow-1);backdrop-filter:saturate(140%) blur(6px)}
-    .nav{max-width:var(--container);margin:0 auto;height:100%;padding:0 16px;display:flex;align-items:center;justify-content:space-between}
-    .brand{display:flex;align-items:center;gap:10px;color:var(--white);font-weight:800}
-    .brand .logo{width:36px;height:36px;display:grid;place-items:center;background:radial-gradient(circle at 30% 30%,#ffd4a8,#ffad66 60%,#ff8a1f 100%);border-radius:50%;box-shadow:inset 0 0 0 2px rgba(255,255,255,.35)}
-    .brand .name{letter-spacing:.4px;font-size:1.1rem}
-    .navlinks{display:flex;align-items:center;gap:22px}
-    .navlinks a{color:#fff;text-decoration:none;font-weight:800;position:relative;padding:6px 2px}
-    .navlinks a::after{content:"";position:absolute;left:0;bottom:-4px;height:2px;width:0;background:#fff;transition:width var(--t)}
-    .navlinks a:hover::after,.navlinks a.active::after{width:100%}
-    .hamburger{display:none;width:36px;height:36px;padding:8px;border-radius:10px;cursor:pointer}
-    .hamburger span{display:block;width:100%;height:3px;background:#fff;border-radius:2px}
-    .hamburger span+span{margin-top:5px}
-    .mobile-menu{position:fixed;inset:var(--nav-h) 0 auto 0;background:color-mix(in srgb,var(--accent) 93%,black 0%);display:none;flex-direction:column;padding:12px;gap:8px;box-shadow:var(--shadow-2)}
-    .mobile-menu a{color:#fff;text-decoration:none;font-weight:800;padding:12px;border-radius:12px}
-    .mobile-menu a:hover{background:rgba(255,255,255,.12)}.mobile-menu.show{display:flex}
-    .container{max-width:var(--container);margin:0 auto;padding:22px 16px}
-    .hero{display:grid;gap:16px;grid-template-columns:1.1fr .9fr;align-items:center;margin-top:14px}
-    .panel{background:linear-gradient(180deg,var(--surface),var(--surface-2));border-radius:var(--radius);padding:22px;box-shadow:var(--shadow-2)}
-    .title{font-size:clamp(1.5rem,1rem + 2vw,2.2rem);font-weight:900;letter-spacing:.4px}
-    .subtitle{color:var(--ink-soft);margin-top:6px}
-    .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
-    .kpi{background:var(--surface);border-radius:12px;padding:16px;box-shadow:var(--shadow-1);text-align:center}
-    .kpi .v{font-size:1.4rem;font-weight:900}.kpi .l{color:var(--muted);font-weight:700;font-size:.92rem}
-    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}.col-12{grid-column:span 12}.col-6{grid-column:span 6}
-    .card{background:var(--surface);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow-1);transition:transform var(--t),box-shadow var(--t)}
-    .card:hover{transform:translateY(-3px);box-shadow:var(--shadow-2)}
-    .section-title{font-size:1.35rem;font-weight:900;margin-bottom:6px;display:flex;align-items:center;gap:8px}
-    .muted{color:var(--muted);font-size:.95rem}
-    .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:12px;border:none;cursor:pointer;font-weight:800}
-    .btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:var(--accent-2)}
-    .btn-ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 2px rgba(0,0,0,.1)}.btn-ghost:hover{background:rgba(0,0,0,.04)}
-    .form{display:grid;gap:10px;margin-top:10px}
-    .field{display:grid;gap:6px}label{font-weight:800}
-    input[type=text],input[type=number],input[type=password],textarea{padding:12px 14px;border-radius:12px;border:2px solid rgba(0,0,0,.08);background:#fff;outline:none;transition:border var(--t),box-shadow var(--t)}
-    textarea{min-height:90px;resize:vertical}input:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(213,95,0,.15)}
-    .list{display:grid;gap:12px}.item{background:#fff;border-radius:14px;padding:14px;box-shadow:var(--shadow-1);display:grid;gap:6px}
-    .item .title{font-size:1.05rem}.tag{display:inline-flex;align-items:center;gap:6px;font-size:.82rem;padding:4px 8px;border-radius:999px}
-    .tag.ok{background:#e9f8f0;color:#0a7c47}.tag.warn{background:#fff7db;color:#8a6b00}.tag.err{background:#ffe7e7;color:#a70f0f}
-    .empty{text-align:center;padding:20px;color:var(--muted);font-weight:800}
-    .back-fab{position:fixed;right:14px;bottom:14px;z-index:900}
-    .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:24px;background:#111;color:#fff;padding:10px 14px;border-radius:999px;box-shadow:var(--shadow-2);opacity:0;pointer-events:none;transition:opacity .25s,transform .25s}
-    .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
-    footer{padding:28px 16px;text-align:center;color:#fff;font-weight:800;opacity:.9}
-    @media (max-width:980px){.hero{grid-template-columns:1fr}.col-6{grid-column:span 12}}
-    @media (max-width:720px){.navlinks{display:none}.hamburger{display:grid;place-items:center}}
-  </style>
+    /* ===== Sections ===== */
+    section {display:none; padding:20px;}
+    section.active {display:block;}
+    h1,h2 {margin-bottom:10px;}
+    .back-btn {margin-top:20px; display:inline-block;}
+    /* ===== Cards ===== */
+    .card {background:rgba(255,255,255,0.1); padding:15px; border-radius:10px; margin-bottom:15px;}
+    .card h3 {margin-bottom:5px;}
+    .card p {font-size:0.9em;}
+    /* ===== Form ===== */
+    .form-group {margin-bottom:10px;}
+    input, textarea {width:100%; padding:8px; border-radius:5px; border:none;}
+    /* ===== Animations ===== */
+    .fade {animation:fadeIn 0.5s;}
+    @keyframes fadeIn {from{opacity:0;} to{opacity:1;}}
+</style>
 </head>
 <body>
-  <!-- NAVBAR -->
-  <header>
-    <div class="nav">
-      <div class="brand" aria-label="Brawl Nest">
-        <div class="logo" aria-hidden="true" title="Brawl Nest">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M3 12c5-1 7-5 8-9 2 5 6 7 10 7-4 2-8 7-8 12-2-3-4-6-10-10z" fill="#fff"/></svg>
-        </div>
-        <div class="name">Brawl Nest</div>
-      </div>
-      <nav class="navlinks" aria-label="Navigation principale">
-        <a href="#" data-link="menu" class="active">Menu</a>
-        <a href="#" data-link="news">News</a>
-        <a href="#" data-link="events">Événements</a>
-        <a href="#" data-link="admin">Admin</a>
-        <a href="#" data-link="retour">Retour</a>
-      </nav>
-      <button class="hamburger" id="hamburger" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobileMenu"><span></span><span></span><span></span></button>
+
+<!-- Navbar -->
+<div class="navbar">
+    <div class="logo"><img src="https://cdn-icons-png.flaticon.com/512/616/616408.png" alt="oiseau">Brawl Nest</div>
+    <div class="nav-links" id="navLinks">
+        <a href="#" data-target="menu">Menu</a>
+        <a href="#" data-target="news">News</a>
+        <a href="#" data-target="events">Événements</a>
+        <a href="#" data-target="admin">Admin</a>
     </div>
-    <div class="mobile-menu" id="mobileMenu" role="dialog" aria-modal="true">
-      <a href="#" data-link="menu">Menu</a>
-      <a href="#" data-link="news">News</a>
-      <a href="#" data-link="events">Événements</a>
-      <a href="#" data-link="admin">Admin</a>
-      <a href="#" data-link="retour">Retour</a>
+    <div class="hamburger" id="hamburger">
+        <div></div><div></div><div></div>
     </div>
-  </header>
+</div>
 
-  <!-- MAIN -->
-  <main>
-    <div class="container">
-      <!-- Menu -->
-      <section id="page-menu" class="page">
-        <div class="hero">
-          <div class="panel">
-            <div class="title">🐦 Bienvenue sur Brawl Nest</div>
-            <div class="subtitle">Site officiel du serveur Discord. News et événements <b>partagés</b> pour tous (stockés côté serveur).</div>
-            <div class="kpis">
-              <div class="kpi"><div class="v" id="kpiMembers">—</div><div class="l">Membres</div></div>
-              <div class="kpi"><div class="v" id="kpiNews">—</div><div class="l">News</div></div>
-              <div class="kpi"><div class="v" id="kpiEvents">—</div><div class="l">Événements actifs</div></div>
-            </div>
-            <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
-              <button class="btn btn-primary" data-link="events">Voir les événements</button>
-              <button class="btn btn-ghost" data-link="news">Lire les news</button>
-            </div>
-          </div>
-          <div class="panel">
-            <div class="section-title">À propos</div>
-            <p class="muted">Rien n'apparaît par défaut : un admin doit créer. Les événements expirent automatiquement via le serveur.</p>
-            <ul style="margin-top:8px;padding-left:18px">
-              <li>Fond orange dégradé
-              <li>Navbar + hamburger mobile
-              <li>Oiseau simple 🐦 (pas un aigle)
-            </ul>
-          </div>
+<!-- Sections -->
+<section id="menu" class="active fade">
+    <h1>Bienvenue sur Brawl Nest</h1>
+    <p>Découvrez nos news et événements récents !</p>
+</section>
+
+<section id="news" class="fade">
+    <h1>News</h1>
+    <div id="newsList"></div>
+    <button class="back-btn" data-target="menu">Retour</button>
+</section>
+
+<section id="events" class="fade">
+    <h1>Événements</h1>
+    <div id="eventsList"></div>
+    <button class="back-btn" data-target="menu">Retour</button>
+</section>
+
+<section id="admin" class="fade">
+    <h1>Admin</h1>
+    <div id="adminPanel">
+        <div class="form-group">
+            <input type="password" id="adminCode" placeholder="Code Admin">
         </div>
-      </section>
-
-      <!-- News -->
-      <section id="page-news" class="page" hidden>
-        <div class="grid">
-          <div class="col-12"><div class="section-title">📰 News du serveur</div><p class="muted">Publiez via l'onglet Admin.</p></div>
-          <div class="col-12 card"><div id="newsList" class="list"></div><div id="newsEmpty" class="empty">Aucune news pour le moment.</div></div>
-        </div>
-      </section>
-
-      <!-- Events -->
-      <section id="page-events" class="page" hidden>
-        <div class="grid">
-          <div class="col-12"><div class="section-title">📅 Événements</div><p class="muted">En cours + à venir. Les expirés disparaissent côté serveur.</p></div>
-          <div class="col-12 card"><div id="eventList" class="list"></div><div id="eventsEmpty" class="empty">Aucun événement pour le moment.</div></div>
-        </div>
-      </section>
-
-      <!-- Admin -->
-      <section id="page-admin" class="page" hidden>
-        <div class="grid">
-          <div class="col-12 col-6 card">
-            <div class="section-title">🔑 Accès Admin</div>
-            <div id="adminGate">
-              <div class="form" style="max-width:460px">
-                <div class="field"><label for="code">Code secret</label><input type="password" id="code" placeholder="2005" autocomplete="current-password"></div>
-                <button class="btn btn-primary" id="btnEnter">Valider</button>
-                <p class="muted">Le code est vérifié <b>côté serveur</b> à chaque création.</p>
-              </div>
-            </div>
-            <div id="adminOk" hidden><div class="tag ok">Accès accordé (session locale)</div><div class="muted" style="margin-top:6px">Tu peux publier des news et des événements.</div></div>
-          </div>
-
-          <div class="col-12 col-6 card" id="adminNews" hidden>
-            <div class="section-title">📝 Publier une news</div>
-            <form class="form" id="newsForm">
-              <div class="field"><label for="newsTitle">Titre</label><input type="text" id="newsTitle" placeholder="Ex.: Nouvelle salle vocale"></div>
-              <div class="field"><label for="newsBody">Contenu</label><textarea id="newsBody" placeholder="Détails de l'annonce..."></textarea></div>
-              <button class="btn btn-primary" type="submit">Publier</button>
-            </form>
-          </div>
-
-          <div class="col-12 card" id="adminEvents" hidden>
-            <div class="section-title">🎯 Créer un événement</div>
-            <form class="form" id="eventForm">
-              <div class="grid" style="grid-template-columns:repeat(12,1fr);gap:12px">
-                <div class="col-12 col-6 field"><label for="eventName">Nom</label><input type="text" id="eventName" placeholder="Tournoi 2v2"></div>
-                <div class="col-12 col-6 field"><label for="eventMinutes">Durée (minutes)</label><input type="number" id="eventMinutes" placeholder="Ex.: 45" min="1"></div>
-                <div class="col-12 field"><label for="eventDetails">Détails</label><textarea id="eventDetails" placeholder="Infos, règles, récompenses..."></textarea></div>
-              </div>
-              <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-primary" type="submit">Créer l'événement</button><button class="btn btn-ghost" type="button" id="btnRefresh">Rafraîchir</button></div>
-              <p class="muted">Expiration automatique via TTL serveur.</p>
-            </form>
-          </div>
-        </div>
-      </section>
+        <button id="loginBtn">Se connecter</button>
     </div>
-  </main>
+    <div id="adminActions" style="display:none;">
+        <h2>Ajouter une news</h2>
+        <div class="form-group"><input type="text" id="newsTitle" placeholder="Titre"></div>
+        <div class="form-group"><textarea id="newsContent" placeholder="Contenu"></textarea></div>
+        <button id="addNews">Ajouter News</button>
 
-  <button class="btn btn-primary back-fab" data-link="menu" title="Retour au menu">↩️ Retour</button>
-  <footer>🐦 Brawl Nest — communauté Discord</footer>
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+        <h2>Ajouter un événement</h2>
+        <div class="form-group"><input type="text" id="eventTitle" placeholder="Titre"></div>
+        <div class="form-group"><textarea id="eventContent" placeholder="Contenu"></textarea></div>
+        <div class="form-group"><input type="number" id="eventMinutes" placeholder="Durée (minutes)"></div>
+        <button id="addEvent">Ajouter Événement</button>
 
-  <script>
-    // ================= FRONT CONFIG =================
-    const FRONTEND_API_BASE = "https://your-worker-subdomain.workers.dev"; // 🔧 REMPLACE ICI par l'URL de ton Worker
+        <button class="back-btn" data-target="menu">Retour</button>
+    </div>
+</section>
 
-    // ================= Utils =================
-    const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
-    const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-    const toast=(m)=>{const t=$('#toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)};
-    const escapeHtml=(str)=>String(str).replace(/[&<>\"]/g,s=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[s]));
+<script>
+/* ===== Navbar Mobile ===== */
+const hamburger = document.getElementById('hamburger');
+const navLinks = document.getElementById('navLinks');
+hamburger.addEventListener('click',()=>{navLinks.classList.toggle('active');});
 
-    // ================= Routing =================
-    const pages={menu:'#page-menu',news:'#page-news',events:'#page-events',admin:'#page-admin'};
-    function showPage(key){Object.values(pages).forEach(sel=>{const el=document.querySelector(sel);if(el)el.hidden=true});const t=document.querySelector(pages[key]||pages.menu);if(t)t.hidden=false;$$('.navlinks a').forEach(a=>a.classList.toggle('active',a.dataset.link===key));mobileMenu(false);if(key==='retour')key='menu';history.replaceState({},'',`#${key}`)}
-    window.addEventListener('load',()=>{const h=location.hash.replace('#','');showPage(pages[h]?h:'menu');updateKpis();refreshAll()});
-    document.addEventListener('click',(e)=>{const a=e.target.closest('[data-link]');if(!a)return;e.preventDefault();const key=a.getAttribute('data-link');if(key==='retour')return showPage('menu');showPage(key)});
-    const hb=$('#hamburger'), mm=$('#mobileMenu');
-    function mobileMenu(force){if(force===true)mm.classList.add('show');else if(force===false)mm.classList.remove('show');else mm.classList.toggle('show');hb.setAttribute('aria-expanded',String(mm.classList.contains('show')))}
-    hb.addEventListener('click',()=>mobileMenu());mm.addEventListener('click',(e)=>{if(e.target.matches('a[data-link]'))mobileMenu(false)});
+/* ===== Page Navigation ===== */
+const links = document.querySelectorAll('.nav-links a');
+const backBtns = document.querySelectorAll('.back-btn');
+const sections = document.querySelectorAll('section');
 
-    // ================= API helpers =================
-    async function api(path,{method='GET',body=null}={}){
-      const res=await fetch(`${FRONTEND_API_BASE}${path}`,{method,headers:{'Content-Type':'application/json'},body:body?JSON.stringify(body):null});
-      if(!res.ok){const msg=await res.text().catch(()=>res.statusText);throw new Error(msg||`HTTP ${res.status}`)}
-      const ct=res.headers.get('content-type')||'';return ct.includes('application/json')?res.json():res.text();
-    }
-
-    // ================= Data: News =================
-    async function loadNews(){return api('/api/news')}
-    function renderNewsList(list){const wrap=$('#newsList'),empty=$('#newsEmpty');wrap.innerHTML='';if(!list.length){empty.style.display='block';$('#kpiNews').textContent='0';return}empty.style.display='none';list.slice().reverse().forEach(n=>{const it=document.createElement('article');it.className='item';const date=new Date(n.ts).toLocaleString();it.innerHTML=`<div class="title">${escapeHtml(n.title)}</div><div class="muted">${date}</div><div>${escapeHtml(n.body)}</div>`;wrap.appendChild(it)});$('#kpiNews').textContent=String(list.length)}
-
-    // ================= Data: Events =================
-    async function loadEvents(){return api('/api/events')}
-    let countdownInt=null;
-    function renderEventsList(list){const wrap=$('#eventList'),empty=$('#eventsEmpty');wrap.innerHTML='';if(!list.length){empty.style.display='block';$('#kpiEvents').textContent='0';return}empty.style.display='none';list.sort((a,b)=>a.ends-b.ends);list.forEach(ev=>{const el=document.createElement('article');el.className='item';el.dataset.id=ev.id;const leftMs=Math.max(0,ev.ends-Date.now());el.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap"><div class="title">${escapeHtml(ev.name)}</div><div class="tag ok">En cours</div></div><div class="muted">Expire dans <b class="left">${human(leftMs)}</b></div><div>${escapeHtml(ev.details||'')}</div>`;wrap.appendChild(el)});$('#kpiEvents').textContent=String(list.length);if(countdownInt)clearInterval(countdownInt);countdownInt=setInterval(()=>{$$('#eventList .item').forEach(node=>{const id=node.dataset.id;const ev=list.find(e=>e.id===id);if(!ev)return;const left=Math.max(0,ev.ends-Date.now());const b=node.querySelector('.left');if(b)b.textContent=human(left);if(left<=0) refreshEvents();});},1000)}
-    const human=(ms)=>{const s=Math.max(0,Math.floor(ms/1000));const m=Math.floor(s/60),r=s%60;return m<=0?`${r}s`:`${m}m ${r}s`};
-
-    async function refreshNews(){try{const list=await loadNews();renderNewsList(list)}catch(e){toast('Erreur chargement news')}}
-    async function refreshEvents(){try{const list=await loadEvents();renderEventsList(list)}catch(e){toast('Erreur chargement événements')}}
-    async function refreshAll(){await Promise.all([refreshNews(),refreshEvents()])}
-
-    // ================= Admin =================
-    let adminUnlocked=false;$('#btnEnter').addEventListener('click',()=>unlock($('#code').value));$('#code').addEventListener('keydown',e=>{if(e.key==='Enter')unlock(e.target.value)});
-    function unlock(code){if(String(code).trim().length){adminUnlocked=true;$('#adminGate').hidden=true;$('#adminOk').hidden=false;$('#adminNews').hidden=false;$('#adminEvents').hidden=false;sessionStorage.setItem('bn_admin_code',code);toast('Accès admin (local)')}}
-
-    $('#newsForm').addEventListener('submit',async(e)=>{e.preventDefault();if(!adminUnlocked)return toast('Accès admin requis');const title=$('#newsTitle').value.trim();const body=$('#newsBody').value.trim();if(!title||!body)return toast('Remplis le titre et le contenu');try{await api('/api/news',{method:'POST',body:{title,body,code:sessionStorage.getItem('bn_admin_code')}});$('#newsTitle').value='';$('#newsBody').value='';toast('News publiée');refreshNews()}catch(err){toast('Échec publication (code?)')}});
-
-    $('#eventForm').addEventListener('submit',async(e)=>{e.preventDefault();if(!adminUnlocked)return toast('Accès admin requis');const name=$('#eventName').value.trim();const minutes=parseInt($('#eventMinutes').value,10);const details=$('#eventDetails').value.trim();if(!name)return toast('Nom requis');if(!Number.isFinite(minutes)||minutes<=0)return toast('Durée invalide');try{await api('/api/events',{method:'POST',body:{name,minutes,details,code:sessionStorage.getItem('bn_admin_code')}});$('#eventName').value='';$('#eventMinutes').value='';$('#eventDetails').value='';toast('Événement créé');refreshEvents()}catch(err){toast('Échec création (code?)')}});
-
-    $('#btnRefresh').addEventListener('click',()=>refreshAll());
-
-    // ================= KPIs & polling =================
-    function updateKpis(){const fakeMembers=120;$('#kpiMembers').textContent=String(fakeMembers)}
-    setInterval(()=>refreshAll(),30000); // poll léger
-  </script>
-
-  <!-- ================= BACKEND: Cloudflare Worker (worker.js) =================
-       Colle ce bloc dans un fichier worker.js et déploie avec Wrangler.
-       Il crée une API JSON avec CORS + KV et TTL pour les événements.
-  ------------------------------------------------------------------------- -->
-  <pre style="white-space:pre-wrap; background:#0f172a; color:#e2e8f0; padding:16px; border-radius:12px; overflow:auto">
-// worker.js (module syntax)
-export default {
-  async fetch(request, env, ctx) {
-    const url = new URL(request.url);
-    if (request.method === 'OPTIONS') return cors();
-
-    try {
-      if (url.pathname === '/api/news' && request.method === 'GET') {
-        const list = await listJson(env.NEWS_KV, 'news:');
-        return cors(json(list));
-      }
-      if (url.pathname === '/api/news' && request.method === 'POST') {
-        const body = await request.json();
-        if (!body || body.code !== env.ADMIN_CODE) return cors(text('Unauthorized', 401));
-        const id = `news:${Date.now()}:${Math.random().toString(36).slice(2,7)}`;
-        const item = { id, title: String(body.title||'').slice(0,120), body: String(body.body||'').slice(0,5000), ts: Date.now() };
-        await env.NEWS_KV.put(id, JSON.stringify(item));
-        return cors(json({ ok: true, id }));
-      }
-
-      if (url.pathname === '/api/events' && request.method === 'GET') {
-        const now = Date.now();
-        const keys = await env.EVENTS_KV.list({ prefix: 'event:' });
-        const items = await Promise.all(keys.keys.map(k => env.EVENTS_KV.get(k.name, 'json')));
-        const list = (items.filter(Boolean)).filter(e => e.ends > now); // sécurité
-        return cors(json(list));
-      }
-      if (url.pathname === '/api/events' && request.method === 'POST') {
-        const body = await request.json();
-        if (!body || body.code !== env.ADMIN_CODE) return cors(text('Unauthorized', 401));
-        const minutes = Math.max(1, parseInt(body.minutes, 10) || 0);
-        const id = `event:${Date.now()}:${Math.random().toString(36).slice(2,7)}`;
-        const start = Date.now();
-        const ends = start + minutes * 60 * 1000;
-        const item = { id, name: String(body.name||'').slice(0,120), details: String(body.details||'').slice(0,5000), start, ends };
-        // TTL côté KV — la clé s'auto-supprime
-        await env.EVENTS_KV.put(id, JSON.stringify(item), { expirationTtl: minutes * 60 });
-        return cors(json({ ok: true, id }));
-      }
-
-      return cors(text('Not Found', 404));
-    } catch (e) {
-      return cors(text('Server Error', 500));
-    }
-  }
-};
-
-function json(data, status = 200) { return new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } }); }
-function text(msg, status = 200) { return new Response(msg, { status }); }
-function cors(res = new Response('', { status: 204 })) {
-  res.headers.set('Access-Control-Allow-Origin', '*');
-  res.headers.set('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
-  res.headers.set('Access-Control-Allow-Headers', 'Content-Type');
-  return res;
+function showSection(id){
+    sections.forEach(sec => sec.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
 }
 
-async function listJson(KV, prefix) {
-  const out = [];
-  let cursor;
-  do {
-    const page = await KV.list({ prefix, cursor });
-    cursor = page.cursor;
-    for (const k of page.keys) {
-      const val = await KV.get(k.name, 'json');
-      if (val) out.push(val);
-    }
-  } while (cursor);
-  return out;
+links.forEach(link=>{
+    link.addEventListener('click', e=>{
+        e.preventDefault();
+        const target = link.getAttribute('data-target');
+        showSection(target);
+        if(navLinks.classList.contains('active')) navLinks.classList.remove('active');
+    });
+});
+backBtns.forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+        const target = btn.getAttribute('data-target');
+        showSection(target);
+    });
+});
+
+/* ===== LocalStorage Data ===== */
+let news = JSON.parse(localStorage.getItem('brawlNews')||'[]');
+let events = JSON.parse(localStorage.getItem('brawlEvents')||'[]');
+
+function renderNews(){
+    const newsDiv = document.getElementById('newsList');
+    newsDiv.innerHTML = '';
+    if(news.length===0){newsDiv.innerHTML='<p>Aucune news pour le moment.</p>'; return;}
+    news.forEach((n,i)=>{
+        const card = document.createElement('div');
+        card.className='card';
+        card.innerHTML=`<h3>${n.title}</h3><p>${n.content}</p>`;
+        newsDiv.appendChild(card);
+    });
 }
-  </pre>
-
-  <!-- ================= Wrangler config ================= -->
-  <pre style="white-space:pre-wrap; background:#0f172a; color:#e2e8f0; padding:16px; border-radius:12px; overflow:auto">
-# wrangler.toml
-name = "brawlnest-api"
-main = "worker.js"
-compatibility_date = "2024-11-01"
-
-[vars]
-ADMIN_CODE = "2005" # 🔒 change-le
-
-[[kv_namespaces]]
-binding = "EVENTS_KV"
-id = "YOUR_EVENTS_NAMESPACE_ID"
-
-[[kv_namespaces]]
-binding = "NEWS_KV"
-id = "YOUR_NEWS_NAMESPACE_ID"
-  </pre>
-
-  <!-- ================= Notes ================= -->
-  <div class="container" style="color:#111;background:#fff7ed;border-radius:12px;box-shadow:var(--shadow-1);margin-top:8px">
-    <div class="section-title">ℹ️ Notes importantes</div>
-    <ul>
-      <li>Les événements/news sont visibles par <b>tout le monde</b> car stockés dans KV côté serveur (plus de localStorage).
-      <li>Les événements expirent automatiquement grâce au <b>TTL</b> KV — pas besoin de nettoyer côté client.
-      <li>Le code admin est vérifié <b>à la création</b> côté serveur (sécurité de base). Pour du solide, remplace par OAuth2 Discord + rôles.
-      <li>Tu peux connecter un <b>webhook Discord</b> côté Worker (POST vers le webhook) pour annoncer chaque création d'événement/news.
-    </ul>
-  </div>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Brawl Nest — Full Stack</title>
-  <!--
-    BRAWL NEST (Full‑stack minimal)
-    ✅ Vrai navbar + mobile hamburger
-    ✅ Events & News partagés pour tout le monde (plus de localStorage)
-    ✅ Back-end API (Cloudflare Workers + KV) fourni ci‑dessous
-    ✅ Expiration automatique des événements côté serveur (TTL)
-    ✅ Admin protégé par code (2005 par défaut, réglable côté serveur)
-    ✅ Prêt pour GitHub Pages (front) + Cloudflare Workers (API)
-
-    🚀 Déploiement résumé
-    1) Déploie l'API (Cloudflare Workers) avec KV (voir bloc "worker.js" plus bas).
-    2) Mets l'URL de ton Worker dans FRONTEND_API_BASE ci‑dessous.
-    3) Héberge ce fichier HTML sur GitHub Pages (ou autre).
-  -->
-  <style>
-    :root{
-      --bg1:#ff7a00;--bg2:#ff9d42;--ink:#111;--ink-soft:#2a2a2a;--surface:#fff8f0;--surface-2:#fff1e0;--accent:#d55f00;--accent-2:#b54f00;--muted:#7a7a7a;--white:#fff;--nav-h:64px;--radius:16px;--radius-sm:12px;--shadow-1:0 6px 14px rgba(0,0,0,.16);--shadow-2:0 10px 24px rgba(0,0,0,.22);--container:1100px;--t:.2s ease
-    }
-    *{box-sizing:border-box}html,body{height:100%}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Helvetica Neue,Arial;color:var(--ink);background:linear-gradient(135deg,var(--bg1),var(--bg2));background-attachment:fixed;line-height:1.45}
-    header{height:var(--nav-h);position:sticky;top:0;z-index:1000;background:color-mix(in srgb,var(--accent) 88%,black 0%);box-shadow:var(--shadow-1);backdrop-filter:saturate(140%) blur(6px)}
-    .nav{max-width:var(--container);margin:0 auto;height:100%;padding:0 16px;display:flex;align-items:center;justify-content:space-between}
-    .brand{display:flex;align-items:center;gap:10px;color:var(--white);font-weight:800}
-    .brand .logo{width:36px;height:36px;display:grid;place-items:center;background:radial-gradient(circle at 30% 30%,#ffd4a8,#ffad66 60%,#ff8a1f 100%);border-radius:50%;box-shadow:inset 0 0 0 2px rgba(255,255,255,.35)}
-    .brand .name{letter-spacing:.4px;font-size:1.1rem}
-    .navlinks{display:flex;align-items:center;gap:22px}
-    .navlinks a{color:#fff;text-decoration:none;font-weight:800;position:relative;padding:6px 2px}
-    .navlinks a::after{content:"";position:absolute;left:0;bottom:-4px;height:2px;width:0;background:#fff;transition:width var(--t)}
-    .navlinks a:hover::after,.navlinks a.active::after{width:100%}
-    .hamburger{display:none;width:36px;height:36px;padding:8px;border-radius:10px;cursor:pointer}
-    .hamburger span{display:block;width:100%;height:3px;background:#fff;border-radius:2px}
-    .hamburger span+span{margin-top:5px}
-    .mobile-menu{position:fixed;inset:var(--nav-h) 0 auto 0;background:color-mix(in srgb,var(--accent) 93%,black 0%);display:none;flex-direction:column;padding:12px;gap:8px;box-shadow:var(--shadow-2)}
-    .mobile-menu a{color:#fff;text-decoration:none;font-weight:800;padding:12px;border-radius:12px}
-    .mobile-menu a:hover{background:rgba(255,255,255,.12)}.mobile-menu.show{display:flex}
-    .container{max-width:var(--container);margin:0 auto;padding:22px 16px}
-    .hero{display:grid;gap:16px;grid-template-columns:1.1fr .9fr;align-items:center;margin-top:14px}
-    .panel{background:linear-gradient(180deg,var(--surface),var(--surface-2));border-radius:var(--radius);padding:22px;box-shadow:var(--shadow-2)}
-    .title{font-size:clamp(1.5rem,1rem + 2vw,2.2rem);font-weight:900;letter-spacing:.4px}
-    .subtitle{color:var(--ink-soft);margin-top:6px}
-    .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
-    .kpi{background:var(--surface);border-radius:12px;padding:16px;box-shadow:var(--shadow-1);text-align:center}
-    .kpi .v{font-size:1.4rem;font-weight:900}.kpi .l{color:var(--muted);font-weight:700;font-size:.92rem}
-    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}.col-12{grid-column:span 12}.col-6{grid-column:span 6}
-    .card{background:var(--surface);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow-1);transition:transform var(--t),box-shadow var(--t)}
-    .card:hover{transform:translateY(-3px);box-shadow:var(--shadow-2)}
-    .section-title{font-size:1.35rem;font-weight:900;margin-bottom:6px;display:flex;align-items:center;gap:8px}
-    .muted{color:var(--muted);font-size:.95rem}
-    .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:12px;border:none;cursor:pointer;font-weight:800}
-    .btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:var(--accent-2)}
-    .btn-ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 2px rgba(0,0,0,.1)}.btn-ghost:hover{background:rgba(0,0,0,.04)}
-    .form{display:grid;gap:10px;margin-top:10px}
-    .field{display:grid;gap:6px}label{font-weight:800}
-    input[type=text],input[type=number],input[type=password],textarea{padding:12px 14px;border-radius:12px;border:2px solid rgba(0,0,0,.08);background:#fff;outline:none;transition:border var(--t),box-shadow var(--t)}
-    textarea{min-height:90px;resize:vertical}input:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(213,95,0,.15)}
-    .list{display:grid;gap:12px}.item{background:#fff;border-radius:14px;padding:14px;box-shadow:var(--shadow-1);display:grid;gap:6px}
-    .item .title{font-size:1.05rem}.tag{display:inline-flex;align-items:center;gap:6px;font-size:.82rem;padding:4px 8px;border-radius:999px}
-    .tag.ok{background:#e9f8f0;color:#0a7c47}.tag.warn{background:#fff7db;color:#8a6b00}.tag.err{background:#ffe7e7;color:#a70f0f}
-    .empty{text-align:center;padding:20px;color:var(--muted);font-weight:800}
-    .back-fab{position:fixed;right:14px;bottom:14px;z-index:900}
-    .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:24px;background:#111;color:#fff;padding:10px 14px;border-radius:999px;box-shadow:var(--shadow-2);opacity:0;pointer-events:none;transition:opacity .25s,transform .25s}
-    .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
-    footer{padding:28px 16px;text-align:center;color:#fff;font-weight:800;opacity:.9}
-    @media (max-width:980px){.hero{grid-template-columns:1fr}.col-6{grid-column:span 12}}
-    @media (max-width:720px){.navlinks{display:none}.hamburger{display:grid;place-items:center}}
-  </style>
-</head>
-<body>
-  <!-- NAVBAR -->
-  <header>
-    <div class="nav">
-      <div class="brand" aria-label="Brawl Nest">
-        <div class="logo" aria-hidden="true" title="Brawl Nest">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M3 12c5-1 7-5 8-9 2 5 6 7 10 7-4 2-8 7-8 12-2-3-4-6-10-10z" fill="#fff"/></svg>
-        </div>
-        <div class="name">Brawl Nest</div>
-      </div>
-      <nav class="navlinks" aria-label="Navigation principale">
-        <a href="#" data-link="menu" class="active">Menu</a>
-        <a href="#" data-link="news">News</a>
-        <a href="#" data-link="events">Événements</a>
-        <a href="#" data-link="admin">Admin</a>
-        <a href="#" data-link="retour">Retour</a>
-      </nav>
-      <button class="hamburger" id="hamburger" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobileMenu"><span></span><span></span><span></span></button>
-    </div>
-    <div class="mobile-menu" id="mobileMenu" role="dialog" aria-modal="true">
-      <a href="#" data-link="menu">Menu</a>
-      <a href="#" data-link="news">News</a>
-      <a href="#" data-link="events">Événements</a>
-      <a href="#" data-link="admin">Admin</a>
-      <a href="#" data-link="retour">Retour</a>
-    </div>
-  </header>
-
-  <!-- MAIN -->
-  <main>
-    <div class="container">
-      <!-- Menu -->
-      <section id="page-menu" class="page">
-        <div class="hero">
-          <div class="panel">
-            <div class="title">🐦 Bienvenue sur Brawl Nest</div>
-            <div class="subtitle">Site officiel du serveur Discord. News et événements <b>partagés</b> pour tous (stockés côté serveur).</div>
-            <div class="kpis">
-              <div class="kpi"><div class="v" id="kpiMembers">—</div><div class="l">Membres</div></div>
-              <div class="kpi"><div class="v" id="kpiNews">—</div><div class="l">News</div></div>
-              <div class="kpi"><div class="v" id="kpiEvents">—</div><div class="l">Événements actifs</div></div>
-            </div>
-            <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
-              <button class="btn btn-primary" data-link="events">Voir les événements</button>
-              <button class="btn btn-ghost" data-link="news">Lire les news</button>
-            </div>
-          </div>
-          <div class="panel">
-            <div class="section-title">À propos</div>
-            <p class="muted">Rien n'apparaît par défaut : un admin doit créer. Les événements expirent automatiquement via le serveur.</p>
-            <ul style="margin-top:8px;padding-left:18px">
-              <li>Fond orange dégradé
-              <li>Navbar + hamburger mobile
-              <li>Oiseau simple 🐦 (pas un aigle)
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      <!-- News -->
-      <section id="page-news" class="page" hidden>
-        <div class="grid">
-          <div class="col-12"><div class="section-title">📰 News du serveur</div><p class="muted">Publiez via l'onglet Admin.</p></div>
-          <div class="col-12 card"><div id="newsList" class="list"></div><div id="newsEmpty" class="empty">Aucune news pour le moment.</div></div>
-        </div>
-      </section>
-
-      <!-- Events -->
-      <section id="page-events" class="page" hidden>
-        <div class="grid">
-          <div class="col-12"><div class="section-title">📅 Événements</div><p class="muted">En cours + à venir. Les expirés disparaissent côté serveur.</p></div>
-          <div class="col-12 card"><div id="eventList" class="list"></div><div id="eventsEmpty" class="empty">Aucun événement pour le moment.</div></div>
-        </div>
-      </section>
-
-      <!-- Admin -->
-      <section id="page-admin" class="page" hidden>
-        <div class="grid">
-          <div class="col-12 col-6 card">
-            <div class="section-title">🔑 Accès Admin</div>
-            <div id="adminGate">
-              <div class="form" style="max-width:460px">
-                <div class="field"><label for="code">Code secret</label><input type="password" id="code" placeholder="2005" autocomplete="current-password"></div>
-                <button class="btn btn-primary" id="btnEnter">Valider</button>
-                <p class="muted">Le code est vérifié <b>côté serveur</b> à chaque création.</p>
-              </div>
-            </div>
-            <div id="adminOk" hidden><div class="tag ok">Accès accordé (session locale)</div><div class="muted" style="margin-top:6px">Tu peux publier des news et des événements.</div></div>
-          </div>
-
-          <div class="col-12 col-6 card" id="adminNews" hidden>
-            <div class="section-title">📝 Publier une news</div>
-            <form class="form" id="newsForm">
-              <div class="field"><label for="newsTitle">Titre</label><input type="text" id="newsTitle" placeholder="Ex.: Nouvelle salle vocale"></div>
-              <div class="field"><label for="newsBody">Contenu</label><textarea id="newsBody" placeholder="Détails de l'annonce..."></textarea></div>
-              <button class="btn btn-primary" type="submit">Publier</button>
-            </form>
-          </div>
-
-          <div class="col-12 card" id="adminEvents" hidden>
-            <div class="section-title">🎯 Créer un événement</div>
-            <form class="form" id="eventForm">
-              <div class="grid" style="grid-template-columns:repeat(12,1fr);gap:12px">
-                <div class="col-12 col-6 field"><label for="eventName">Nom</label><input type="text" id="eventName" placeholder="Tournoi 2v2"></div>
-                <div class="col-12 col-6 field"><label for="eventMinutes">Durée (minutes)</label><input type="number" id="eventMinutes" placeholder="Ex.: 45" min="1"></div>
-                <div class="col-12 field"><label for="eventDetails">Détails</label><textarea id="eventDetails" placeholder="Infos, règles, récompenses..."></textarea></div>
-              </div>
-              <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-primary" type="submit">Créer l'événement</button><button class="btn btn-ghost" type="button" id="btnRefresh">Rafraîchir</button></div>
-              <p class="muted">Expiration automatique via TTL serveur.</p>
-            </form>
-          </div>
-        </div>
-      </section>
-    </div>
-  </main>
-
-  <button class="btn btn-primary back-fab" data-link="menu" title="Retour au menu">↩️ Retour</button>
-  <footer>🐦 Brawl Nest — communauté Discord</footer>
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
-
-  <script>
-    // ================= FRONT CONFIG =================
-    const FRONTEND_API_BASE = "https://your-worker-subdomain.workers.dev"; // 🔧 REMPLACE ICI par l'URL de ton Worker
-
-    // ================= Utils =================
-    const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
-    const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-    const toast=(m)=>{const t=$('#toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)};
-    const escapeHtml=(str)=>String(str).replace(/[&<>\"]/g,s=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[s]));
-
-    // ================= Routing =================
-    const pages={menu:'#page-menu',news:'#page-news',events:'#page-events',admin:'#page-admin'};
-    function showPage(key){Object.values(pages).forEach(sel=>{const el=document.querySelector(sel);if(el)el.hidden=true});const t=document.querySelector(pages[key]||pages.menu);if(t)t.hidden=false;$$('.navlinks a').forEach(a=>a.classList.toggle('active',a.dataset.link===key));mobileMenu(false);if(key==='retour')key='menu';history.replaceState({},'',`#${key}`)}
-    window.addEventListener('load',()=>{const h=location.hash.replace('#','');showPage(pages[h]?h:'menu');updateKpis();refreshAll()});
-    document.addEventListener('click',(e)=>{const a=e.target.closest('[data-link]');if(!a)return;e.preventDefault();const key=a.getAttribute('data-link');if(key==='retour')return showPage('menu');showPage(key)});
-    const hb=$('#hamburger'), mm=$('#mobileMenu');
-    function mobileMenu(force){if(force===true)mm.classList.add('show');else if(force===false)mm.classList.remove('show');else mm.classList.toggle('show');hb.setAttribute('aria-expanded',String(mm.classList.contains('show')))}
-    hb.addEventListener('click',()=>mobileMenu());mm.addEventListener('click',(e)=>{if(e.target.matches('a[data-link]'))mobileMenu(false)});
-
-    // ================= API helpers =================
-    async function api(path,{method='GET',body=null}={}){
-      const res=await fetch(`${FRONTEND_API_BASE}${path}`,{method,headers:{'Content-Type':'application/json'},body:body?JSON.stringify(body):null});
-      if(!res.ok){const msg=await res.text().catch(()=>res.statusText);throw new Error(msg||`HTTP ${res.status}`)}
-      const ct=res.headers.get('content-type')||'';return ct.includes('application/json')?res.json():res.text();
-    }
-
-    // ================= Data: News =================
-    async function loadNews(){return api('/api/news')}
-    function renderNewsList(list){const wrap=$('#newsList'),empty=$('#newsEmpty');wrap.innerHTML='';if(!list.length){empty.style.display='block';$('#kpiNews').textContent='0';return}empty.style.display='none';list.slice().reverse().forEach(n=>{const it=document.createElement('article');it.className='item';const date=new Date(n.ts).toLocaleString();it.innerHTML=`<div class="title">${escapeHtml(n.title)}</div><div class="muted">${date}</div><div>${escapeHtml(n.body)}</div>`;wrap.appendChild(it)});$('#kpiNews').textContent=String(list.length)}
-
-    // ================= Data: Events =================
-    async function loadEvents(){return api('/api/events')}
-    let countdownInt=null;
-    function renderEventsList(list){const wrap=$('#eventList'),empty=$('#eventsEmpty');wrap.innerHTML='';if(!list.length){empty.style.display='block';$('#kpiEvents').textContent='0';return}empty.style.display='none';list.sort((a,b)=>a.ends-b.ends);list.forEach(ev=>{const el=document.createElement('article');el.className='item';el.dataset.id=ev.id;const leftMs=Math.max(0,ev.ends-Date.now());el.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap"><div class="title">${escapeHtml(ev.name)}</div><div class="tag ok">En cours</div></div><div class="muted">Expire dans <b class="left">${human(leftMs)}</b></div><div>${escapeHtml(ev.details||'')}</div>`;wrap.appendChild(el)});$('#kpiEvents').textContent=String(list.length);if(countdownInt)clearInterval(countdownInt);countdownInt=setInterval(()=>{$$('#eventList .item').forEach(node=>{const id=node.dataset.id;const ev=list.find(e=>e.id===id);if(!ev)return;const left=Math.max(0,ev.ends-Date.now());const b=node.querySelector('.left');if(b)b.textContent=human(left);if(left<=0) refreshEvents();});},1000)}
-    const human=(ms)=>{const s=Math.max(0,Math.floor(ms/1000));const m=Math.floor(s/60),r=s%60;return m<=0?`${r}s`:`${m}m ${r}s`};
-
-    async function refreshNews(){try{const list=await loadNews();renderNewsList(list)}catch(e){toast('Erreur chargement news')}}
-    async function refreshEvents(){try{const list=await loadEvents();renderEventsList(list)}catch(e){toast('Erreur chargement événements')}}
-    async function refreshAll(){await Promise.all([refreshNews(),refreshEvents()])}
-
-    // ================= Admin =================
-    let adminUnlocked=false;$('#btnEnter').addEventListener('click',()=>unlock($('#code').value));$('#code').addEventListener('keydown',e=>{if(e.key==='Enter')unlock(e.target.value)});
-    function unlock(code){if(String(code).trim().length){adminUnlocked=true;$('#adminGate').hidden=true;$('#adminOk').hidden=false;$('#adminNews').hidden=false;$('#adminEvents').hidden=false;sessionStorage.setItem('bn_admin_code',code);toast('Accès admin (local)')}}
-
-    $('#newsForm').addEventListener('submit',async(e)=>{e.preventDefault();if(!adminUnlocked)return toast('Accès admin requis');const title=$('#newsTitle').value.trim();const body=$('#newsBody').value.trim();if(!title||!body)return toast('Remplis le titre et le contenu');try{await api('/api/news',{method:'POST',body:{title,body,code:sessionStorage.getItem('bn_admin_code')}});$('#newsTitle').value='';$('#newsBody').value='';toast('News publiée');refreshNews()}catch(err){toast('Échec publication (code?)')}});
-
-    $('#eventForm').addEventListener('submit',async(e)=>{e.preventDefault();if(!adminUnlocked)return toast('Accès admin requis');const name=$('#eventName').value.trim();const minutes=parseInt($('#eventMinutes').value,10);const details=$('#eventDetails').value.trim();if(!name)return toast('Nom requis');if(!Number.isFinite(minutes)||minutes<=0)return toast('Durée invalide');try{await api('/api/events',{method:'POST',body:{name,minutes,details,code:sessionStorage.getItem('bn_admin_code')}});$('#eventName').value='';$('#eventMinutes').value='';$('#eventDetails').value='';toast('Événement créé');refreshEvents()}catch(err){toast('Échec création (code?)')}});
-
-    $('#btnRefresh').addEventListener('click',()=>refreshAll());
-
-    // ================= KPIs & polling =================
-    function updateKpis(){const fakeMembers=120;$('#kpiMembers').textContent=String(fakeMembers)}
-    setInterval(()=>refreshAll(),30000); // poll léger
-  </script>
-
-  <!-- ================= BACKEND: Cloudflare Worker (worker.js) =================
-       Colle ce bloc dans un fichier worker.js et déploie avec Wrangler.
-       Il crée une API JSON avec CORS + KV et TTL pour les événements.
-  ------------------------------------------------------------------------- -->
-  <pre style="white-space:pre-wrap; background:#0f172a; color:#e2e8f0; padding:16px; border-radius:12px; overflow:auto">
-// worker.js (module syntax)
-export default {
-  async fetch(request, env, ctx) {
-    const url = new URL(request.url);
-    if (request.method === 'OPTIONS') return cors();
-
-    try {
-      if (url.pathname === '/api/news' && request.method === 'GET') {
-        const list = await listJson(env.NEWS_KV, 'news:');
-        return cors(json(list));
-      }
-      if (url.pathname === '/api/news' && request.method === 'POST') {
-        const body = await request.json();
-        if (!body || body.code !== env.ADMIN_CODE) return cors(text('Unauthorized', 401));
-        const id = `news:${Date.now()}:${Math.random().toString(36).slice(2,7)}`;
-        const item = { id, title: String(body.title||'').slice(0,120), body: String(body.body||'').slice(0,5000), ts: Date.now() };
-        await env.NEWS_KV.put(id, JSON.stringify(item));
-        return cors(json({ ok: true, id }));
-      }
-
-      if (url.pathname === '/api/events' && request.method === 'GET') {
-        const now = Date.now();
-        const keys = await env.EVENTS_KV.list({ prefix: 'event:' });
-        const items = await Promise.all(keys.keys.map(k => env.EVENTS_KV.get(k.name, 'json')));
-        const list = (items.filter(Boolean)).filter(e => e.ends > now); // sécurité
-    return cors(json(list));
-      }
-      if (url.pathname === '/api/events' && request.method === 'POST') {
-        const body = await request.json();
-        if (!body || body.code !== env.ADMIN_CODE) return cors(text('Unauthorized', 401));
-        const minutes = Math.max(1, parseInt(body.minutes, 10) || 0);
-        const id = `event:${Date.now()}:${Math.random().toString(36).slice(2,7)}`;
-        const start = Date.now();
-        const ends = start + minutes * 60 * 1000;
-        const item = { id, name: String(body.name||'').slice(0,120), details: String(body.details||'').slice(0,5000), start, ends };
-        // TTL côté KV — la clé s'auto-supprime
-        await env.EVENTS_KV.put(id, JSON.stringify(item), { expirationTtl: minutes * 60 });
-        return cors(json({ ok: true, id }));
-      }
-
-      return cors(text('Not Found', 404));
-    } catch (e) {
-      return cors(text('Server Error', 500));
-    }
-  }
-};
-
-function json(data, status = 200) { return new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } }); }
-function text(msg, status = 200) { return new Response(msg, { status }); }
-function cors(res = new Response('', { status: 204 })) {
-  res.headers.set('Access-Control-Allow-Origin', '*');
-  res.headers.set('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
-  res.headers.set('Access-Control-Allow-Headers', 'Content-Type');
-  return res;
+function renderEvents(){
+    const eventsDiv = document.getElementById('eventsList');
+    eventsDiv.innerHTML = '';
+    const now = Date.now();
+    events = events.filter(e=>e.end>now);
+    localStorage.setItem('brawlEvents',JSON.stringify(events));
+    if(events.length===0){eventsDiv.innerHTML='<p>Aucun événement pour le moment.</p>'; return;}
+    events.forEach((e,i)=>{
+        const card = document.createElement('div');
+        card.className='card';
+        const minutesLeft = Math.ceil((e.end-now)/60000);
+        card.innerHTML=`<h3>${e.title} (${minutesLeft} min restantes)</h3><p>${e.content}</p>`;
+        eventsDiv.appendChild(card);
+    });
 }
+renderNews();
+renderEvents();
 
-async function listJson(KV, prefix) {
-  const out = [];
-  let cursor;
-  do {
-    const page = await KV.list({ prefix, cursor });
-    cursor = page.cursor;
-    for (const k of page.keys) {
-      const val = await KV.get(k.name, 'json');
-      if (val) out.push(val);
+/* ===== Admin ===== */
+const adminCode = '2005';
+const loginBtn = document.getElementById('loginBtn');
+const adminPanel = document.getElementById('adminPanel');
+const adminActions = document.getElementById('adminActions');
+
+loginBtn.addEventListener('click', ()=>{
+    const codeInput = document.getElementById('adminCode').value;
+    if(codeInput===adminCode){
+        adminPanel.style.display='none';
+        adminActions.style.display='block';
+        alert('Connexion admin réussie !');
+    } else {
+        alert('Code incorrect !');
     }
-  } while (cursor);
-  return out;
-}
-  </pre>
+});
 
-  <!-- ================= Wrangler config ================= -->
-  <pre style="white-space:pre-wrap; background:#0f172a; color:#e2e8f0; padding:16px; border-radius:12px; overflow:auto">
-# wrangler.toml
-name = "brawlnest-api"
-main = "worker.js"
-compatibility_date = "2024-11-01"
+/* ===== Add News/Event ===== */
+document.getElementById('addNews').addEventListener('click',()=>{
+    const title = document.getElementById('newsTitle').value.trim();
+    const content = document.getElementById('newsContent').value.trim();
+    if(!title||!content){alert('Remplir tous les champs'); return;}
+    news.unshift({title,content});
+    localStorage.setItem('brawlNews',JSON.stringify(news));
+    document.getElementById('newsTitle').value='';
+    document.getElementById('newsContent').value='';
+    renderNews();
+    alert('News ajoutée !');
+});
 
-[vars]
-ADMIN_CODE = "2005" # 🔒 change-le
+document.getElementById('addEvent').addEventListener('click',()=>{
+    const title = document.getElementById('eventTitle').value.trim();
+    const content = document.getElementById('eventContent').value.trim();
+    const minutes = parseInt(document.getElementById('eventMinutes').value);
+    if(!title||!content||isNaN(minutes)||minutes<=0){alert('Remplir tous les champs correctement'); return;}
+    const end = Date.now()+minutes*60000;
+    events.unshift({title,content,end});
+    localStorage.setItem('brawlEvents',JSON.stringify(events));
+    document.getElementById('eventTitle').value='';
+    document.getElementById('eventContent').value='';
+    document.getElementById('eventMinutes').value='';
+    renderEvents();
+    alert('Événement ajouté !');
+});
 
-[[kv_namespaces]]
-binding = "EVENTS_KV"
-id = "YOUR_EVENTS_NAMESPACE_ID"
-
-[[kv_namespaces]]
-binding = "NEWS_KV"
-id = "YOUR_NEWS_NAMESPACE_ID"
-  </pre>
-
-  <!-- ================= Notes ================= -->
-  <div class="container" style="color:#111;background:#fff7ed;border-radius:12px;box-shadow:var(--shadow-1);margin-top:8px">
-    <div class="section-title">ℹ️ Notes importantes</div>
-    <ul>
-      <li>Les événements/news sont visibles par <b>tout le monde</b> car stockés dans KV côté serveur (plus de localStorage).
-      <li>Les événements expirent automatiquement grâce au <b>TTL</b> KV — pas besoin de nettoyer côté client.
-      <li>Le code admin est vérifié <b>à la création</b> côté serveur (sécurité de base). Pour du solide, remplace par OAuth2 Discord + rôles.
-      <li>Tu peux connecter un <b>webhook Discord</b> côté Worker (POST vers le webhook) pour annoncer chaque création d'événement/news.
-    </ul>
-  </div>
+/* ===== Auto-refresh events every 30s ===== */
+setInterval(renderEvents,30000);
+</script>
 </body>
 </html>
