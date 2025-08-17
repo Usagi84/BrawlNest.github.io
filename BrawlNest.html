@@ -7,9 +7,9 @@
   <style>
     :root {
       --orange: #ff7a00;
-      --orange-dark: #e06a00;
-      --light: #fff8f0;
-      --dark: #222;
+      --orange-dark: #d96600;
+      --light: #fffaf3;
+      --dark: #1a1a1a;
     }
     * {
       margin: 0;
@@ -17,72 +17,130 @@
       box-sizing: border-box;
     }
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: var(--orange);
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, var(--orange), #ff9b3d);
       color: var(--dark);
       line-height: 1.5;
+      min-height: 100vh;
     }
 
-    /* Navbar */
+    /* NAVBAR */
     header {
       background: var(--orange-dark);
       color: white;
-      padding: 12px 20px;
       position: sticky;
       top: 0;
       z-index: 1000;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
     }
     nav {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      max-width: 1000px;
+      max-width: 1100px;
       margin: auto;
+      padding: 12px 20px;
     }
     nav .logo {
-      font-size: 1.2em;
+      font-size: 1.5em;
       font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    nav .logo span {
+      font-size: 1.2em;
     }
     nav ul {
       display: flex;
       list-style: none;
-      gap: 20px;
+      gap: 25px;
     }
     nav a {
       color: white;
       text-decoration: none;
       font-weight: 600;
-      transition: 0.2s;
+      position: relative;
+      transition: 0.3s;
     }
-    nav a:hover {
-      text-decoration: underline;
+    nav a::after {
+      content: "";
+      position: absolute;
+      width: 0%;
+      height: 2px;
+      background: white;
+      left: 0;
+      bottom: -4px;
+      transition: 0.3s;
+    }
+    nav a:hover::after {
+      width: 100%;
     }
 
+    /* Hamburger (mobile) */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+    }
+    .hamburger div {
+      width: 25px;
+      height: 3px;
+      background: white;
+      border-radius: 2px;
+    }
+    @media (max-width: 768px) {
+      nav ul {
+        display: none;
+        flex-direction: column;
+        background: var(--orange-dark);
+        position: absolute;
+        top: 60px;
+        right: 20px;
+        padding: 15px;
+        border-radius: 10px;
+      }
+      nav ul.active {
+        display: flex;
+      }
+      .hamburger {
+        display: flex;
+      }
+    }
+
+    /* MAIN CONTENT */
     main {
       max-width: 900px;
       margin: auto;
       padding: 20px;
+      margin-top: 20px;
     }
-
     h1 {
       margin-bottom: 15px;
     }
 
     .card {
       background: var(--light);
-      padding: 15px;
-      border-radius: 12px;
-      margin: 15px 0;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      padding: 20px;
+      border-radius: 15px;
+      margin: 20px 0;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 18px rgba(0,0,0,0.25);
     }
 
     input, button {
-      padding: 10px;
-      margin: 5px 0;
-      border-radius: 8px;
+      padding: 12px;
+      margin: 8px 0;
+      border-radius: 10px;
       border: 1px solid #ccc;
       width: 100%;
       max-width: 400px;
+      font-size: 1em;
     }
     button {
       background: var(--orange-dark);
@@ -90,54 +148,47 @@
       font-weight: bold;
       cursor: pointer;
       border: none;
+      transition: 0.2s;
     }
     button:hover {
-      background: #c95d00;
-    }
-
-    /* Responsive */
-    @media (max-width: 700px) {
-      nav ul {
-        flex-direction: column;
-        gap: 10px;
-        background: var(--orange-dark);
-        padding: 10px;
-        border-radius: 10px;
-      }
-      nav {
-        flex-direction: column;
-        gap: 10px;
-      }
+      background: #b75200;
     }
 
     .hidden { display: none; }
   </style>
 </head>
 <body>
+  <!-- NAVBAR -->
   <header>
     <nav>
-      <div class="logo">🐦 Brawl Nest</div>
-      <ul>
+      <div class="logo">🐦 <span>Brawl Nest</span></div>
+      <ul id="nav-links">
         <li><a href="#" onclick="showPage('menu')">Menu</a></li>
         <li><a href="#" onclick="showPage('news')">News</a></li>
         <li><a href="#" onclick="showPage('events')">Événements</a></li>
         <li><a href="#" onclick="showPage('admin')">Admin</a></li>
         <li><a href="#" onclick="showPage('menu')">Retour</a></li>
       </ul>
+      <div class="hamburger" onclick="toggleMenu()">
+        <div></div><div></div><div></div>
+      </div>
     </nav>
   </header>
 
+  <!-- MAIN -->
   <main>
     <!-- Menu -->
     <section id="menu">
       <h1>🐦 Bienvenue sur Brawl Nest</h1>
       <p>Le site officiel de notre serveur Discord !</p>
+      <div class="card">🔥 Rejoins la communauté et découvre nos news et événements exclusifs !</div>
     </section>
 
     <!-- News -->
     <section id="news" class="hidden">
       <h1>📰 News</h1>
       <div class="card">⚡ Mise à jour du serveur : nouvelle salle vocale ajoutée !</div>
+      <div class="card">🎉 Concours de création de logo en cours !</div>
     </section>
 
     <!-- Events -->
@@ -151,7 +202,7 @@
       <h1>🔑 Accès Admin</h1>
       <div id="adminLogin" class="card">
         <p>Entre le code secret :</p>
-        <input type="password" id="adminCode">
+        <input type="password" id="adminCode" placeholder="Code admin">
         <button onclick="checkCode()">Valider</button>
       </div>
       <div id="adminPanel" class="hidden card">
@@ -167,6 +218,8 @@
     function showPage(page) {
       document.querySelectorAll("main section").forEach(sec => sec.classList.add("hidden"));
       document.getElementById(page).classList.remove("hidden");
+      // fermer menu mobile si ouvert
+      document.getElementById("nav-links").classList.remove("active");
     }
 
     function checkCode() {
@@ -196,6 +249,10 @@
       setTimeout(() => {
         document.getElementById("eventList").innerHTML = "Aucun événement pour le moment.";
       }, duration * 60000);
+    }
+
+    function toggleMenu() {
+      document.getElementById("nav-links").classList.toggle("active");
     }
   </script>
 </body>
