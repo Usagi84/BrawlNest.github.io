@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brawl Nest - Serveur Discord</title>
+    <title>Brawl Nest</title>
     <style>
         * {
             margin: 0;
@@ -500,14 +500,14 @@
         <nav class="sidebar" id="sidebar">
             <div class="logo-section">
                 <div class="logo-icon">🐦</div>
-                <div class="logo-text">BRAWL NEST</div>
+                <div class="logo-text">Brawl Nest</div>
             </div>
             <ul class="nav-menu">
-                <li><a href="#" onclick="showSection('home')" class="active" id="nav-home">🏠 Accueil</a></li>
-                <li><a href="#" onclick="showSection('events')" id="nav-events">🎮 Événements</a></li>
-                <li><a href="#" onclick="showSection('news')" id="nav-news">📰 News</a></li>
-                <li><a href="#" onclick="showSection('discord')" id="nav-discord">💬 Discord</a></li>
-                <li><a href="#" onclick="showSection('admin')" id="nav-admin">⚙️ Admin</a></li>
+                <li><a href="#home" onclick="showSection('home')" class="active" id="nav-home">🏠 Home</a></li>
+                <li><a href="#events" onclick="showSection('events')" id="nav-events">🎮 Events</a></li>
+                <li><a href="#news" onclick="showSection('news')" id="nav-news">📰 News</a></li>
+                <li><a href="#discord" onclick="showSection('discord')" id="nav-discord">💬 Discord</a></li>
+                <li><a href="#panel" onclick="showSection('admin')" id="nav-admin">⚙️ Admin</a></li>
             </ul>
         </nav>
 
@@ -520,8 +520,8 @@
             <div id="home" class="content-section active">
                 <div class="welcome-banner">
                     <h1>Bienvenue sur Brawl Nest</h1>
-                    <p>Le serveur Discord gaming communautaire ultime !</p>
-                    <a href="#" onclick="showSection('discord')" class="cta-button">Rejoindre le Discord</a>
+                    <p>Le serveur Discord gaming communautaire Brawl stars !</p>
+                    <a href="#invitediscord" onclick="showSection('discord')" class="cta-button">Rejoindre le Discord</a>
                 </div>
 
                 <div class="stats-grid">
@@ -535,7 +535,7 @@
                     </div>
                     <div class="stat-card">
                         <div class="stat-number" id="eventCount">0</div>
-                        <div class="stat-label">Événements</div>
+                        <div class="stat-label">Events</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-number" id="newsCount">0</div>
@@ -547,7 +547,7 @@
             <!-- Section Événements -->
             <div id="events" class="content-section">
                 <div class="section-card">
-                    <h2 class="section-title">🎮 Événements</h2>
+                    <h2 class="section-title">🎮 Events</h2>
                     <div class="events-container" id="eventsContainer">
                         <div class="no-content">
                             <p>Aucun événement pour le moment.<br>Revenez plus tard ou contactez les administrateurs !</p>
@@ -559,7 +559,7 @@
             <!-- Section News -->
             <div id="news" class="content-section">
                 <div class="section-card">
-                    <h2 class="section-title">📰 News du serveur</h2>
+                    <h2 class="section-title">📰 News</h2>
                     <div class="news-container" id="newsContainer">
                         <div class="no-content">
                             <p>Aucune news pour le moment.<br>Restez connectés pour les dernières actualités !</p>
@@ -571,11 +571,11 @@
             <!-- Section Discord -->
             <div id="discord" class="content-section">
                 <div class="section-card">
-                    <h2 class="section-title">💬 Rejoindre Discord</h2>
+                    <h2 class="section-title">💬 Rejoindre le Discord</h2>
                     <div style="text-align: center;">
                         <p style="font-size: 1.2em; margin-bottom: 30px;">
                             Rejoignez notre communauté Discord pour participer aux événements, 
-                            discuter avec d'autres gamers et rester au courant des dernières news !
+                            discuter avec d'autres personnes et rester au courant des dernières news !
                         </p>
                         <button class="cta-button" onclick="joinDiscord()">
                             🎮 Rejoindre le serveur Discord
@@ -720,7 +720,7 @@
             const code = document.getElementById('adminCode').value;
             const errorDiv = document.getElementById('loginError');
             
-            if (code === '2005') {
+            if (code === 'BIRD') {
                 isAdmin = true;
                 document.getElementById('adminLogin').style.display = 'none';
                 document.getElementById('adminForm').style.display = 'block';
@@ -1151,7 +1151,7 @@
 
         function joinDiscord() {
             // Remplacez par votre vrai lien d'invitation Discord
-            window.open('https://discord.gg/votre-invitation', '_blank');
+            window.open('https://discord.gg/xZkWdaqV', '_blank');
         }
 
         // Vérifier les événements en cours au chargement
