@@ -624,9 +624,8 @@
         <main class="main-content" id="mainContent">
             <!-- Banner de permission de notification -->
             <div class="notification-banner" id="notificationBanner">
-                <h3>🔔 Recevoir les notifications</h3>
-                <p>Activez les notifications pour être prévenu en temps réel des nouveaux événements et news !</p>
-                <button class="btn" onclick="requestNotificationPermission()">Activer les notifications</button>
+                <h3>🔔 Recevoir des notifications</h3>
+                <button class="btn" onclick="requestNotificationPermission()">Activer</button>
                 <button class="btn btn-secondary" onclick="hideNotificationBanner()">Plus tard</button>
             </div>
 
@@ -831,7 +830,7 @@
                 // Fermer la notification après 5 secondes
                 setTimeout(() => {
                     notification.close();
-                }, 5000);
+                }, 3500);
             }
 
             // Afficher aussi la notification in-app
@@ -1402,7 +1401,7 @@
                 
                 // Afficher le banner seulement si conditions remplies
                 if (notificationPermission === 'default' && !notificationRequested) {
-                    setTimeout(showNotificationBanner, 1000); // Délai de 3 secondes
+                    setTimeout(showNotificationBanner, 3000); // Délai de 3 secondes
                 }
             }
 
@@ -1430,13 +1429,6 @@
             const now = new Date();
             now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
             document.getElementById('eventDateTime').value = now.toISOString().slice(0,16);
-
-            // Message de bienvenue avec les notifications (seulement si autorisées)
-            setTimeout(() => {
-                if (notificationPermission === 'granted') {
-                    showInAppNotification("🎮 Bienvenue sur Brawl Nest !", "Vous recevrez les notifications des nouveaux événements et news !");
-                }
-            }, 1000);
         });
     </script>
 </body>
