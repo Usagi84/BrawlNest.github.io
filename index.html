@@ -707,56 +707,81 @@
                     
                     <div class="admin-login" id="adminLogin">
                         <div class="form-group">
-                            <input type="password" id="adminCode" placeholder="Code d'accès administrateur">
+                            <label>Identifiant</label>
+                            <input type="text" id="adminUsername" placeholder="Identifiant">
+                        </div>
+                        <div class="form-group">
+                            <label>Mot de passe</label>
+                            <input type="password" id="adminPassword" placeholder="Mot de passe">
                         </div>
                         <button class="btn" onclick="adminLogin()">Se connecter</button>
                         <div class="error" id="loginError"></div>
                     </div>
 
                     <div class="admin-form" id="adminForm">
-                        <h3>Ajouter un événement</h3>
-                        <div class="form-group">
-                            <label>Titre de l'événement</label>
-                            <input type="text" id="eventTitle" placeholder="Ex: Tournoi Brawl Stars">
+                        <div id="adminWelcome" style="margin-bottom: 20px; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 10px;">
+                            <h3 id="adminRoleDisplay"></h3>
                         </div>
-                        <div class="form-group">
-                            <label>Description</label>
-                            <textarea id="eventDescription" rows="3" placeholder="Description de l'événement..."></textarea>
+
+                        <!-- Boutons d'actions rapides -->
+                        <div style="margin-bottom: 30px; text-align: center;">
+                            <button class="btn" onclick="showEventForm()">🎮 Ajouter un événement</button>
+                            <button class="btn" onclick="showNewsForm()">📰 Ajouter une news</button>
+                            <div id="ownerButtons" style="display: none; margin-top: 10px;">
+                                <button class="btn btn-danger" onclick="clearEvents()">🗑️ Effacer tous les événements</button>
+                                <button class="btn btn-danger" onclick="clearNews()">🗑️ Effacer toutes les news</button>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label>Date et heure de l'événement</label>
-                            <input type="datetime-local" id="eventDateTime">
+
+                        <!-- Formulaire événement -->
+                        <div id="eventFormSection" style="display: none;">
+                            <h3>Ajouter un événement</h3>
+                            <div class="form-group">
+                                <label>Titre de l'événement</label>
+                                <input type="text" id="eventTitle" placeholder="Ex: Tournoi Brawl Stars">
+                            </div>
+                            <div class="form-group">
+                                <label>Description</label>
+                                <textarea id="eventDescription" rows="3" placeholder="Description de l'événement..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Date et heure de l'événement</label>
+                                <input type="datetime-local" id="eventDateTime">
+                            </div>
+                            <div class="form-group">
+                                <label>Statut</label>
+                                <select id="eventStatus">
+                                    <option value="upcoming">À venir</option>
+                                    <option value="ongoing">En cours</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Durée (en minutes)</label>
+                                <input type="number" id="eventDuration" placeholder="120" min="1">
+                            </div>
+                            <button class="btn" onclick="addEvent()">Ajouter l'événement</button>
+                            <button class="btn btn-secondary" onclick="hideEventForm()">Annuler</button>
                         </div>
-                        <div class="form-group">
-                            <label>Statut</label>
-                            <select id="eventStatus">
-                                <option value="upcoming">À venir</option>
-                                <option value="ongoing">En cours</option>
-                            </select>
+
+                        <!-- Formulaire news -->
+                        <div id="newsFormSection" style="display: none;">
+                            <h3>Ajouter une news</h3>
+                            <div class="form-group">
+                                <label>Titre de la news</label>
+                                <input type="text" id="newsTitle" placeholder="Titre de la news">
+                            </div>
+                            <div class="form-group">
+                                <label>Contenu</label>
+                                <textarea id="newsContent" rows="4" placeholder="Contenu de la news..."></textarea>
+                            </div>
+                            <button class="btn" onclick="addNews()">Publier la news</button>
+                            <button class="btn btn-secondary" onclick="hideNewsForm()">Annuler</button>
                         </div>
-                        <div class="form-group">
-                            <label>Durée (en minutes)</label>
-                            <input type="number" id="eventDuration" placeholder="120" min="1">
-                        </div>
-                        <button class="btn" onclick="addEvent()">Ajouter l'événement</button>
 
                         <hr style="margin: 30px 0;">
 
                         <h3>Gérer les événements existants</h3>
                         <div id="adminEventsList"></div>
-
-                        <hr style="margin: 30px 0;">
-
-                        <h3>Ajouter une news</h3>
-                        <div class="form-group">
-                            <label>Titre de la news</label>
-                            <input type="text" id="newsTitle" placeholder="Titre de la news">
-                        </div>
-                        <div class="form-group">
-                            <label>Contenu</label>
-                            <textarea id="newsContent" rows="4" placeholder="Contenu de la news..."></textarea>
-                        </div>
-                        <button class="btn" onclick="addNews()">Publier la news</button>
 
                         <hr style="margin: 30px 0;">
 
@@ -766,8 +791,6 @@
                         <hr style="margin: 30px 0;">
 
                         <h3>Gestion</h3>
-                        <button class="btn btn-danger" onclick="clearEvents()">Effacer tous les événements</button>
-                        <button class="btn btn-danger" onclick="clearNews()">Effacer toutes les news</button>
                         <button class="btn btn-secondary" onclick="adminLogout()">Déconnexion</button>
                     </div>
                 </div>
@@ -778,6 +801,8 @@
     <script>
         let currentSection = 'home';
         let isAdmin = false;
+        let isOwner = false;
+        let adminRole = '';
         let events = [];
         let news = [];
         let eventTimers = {};
@@ -956,34 +981,91 @@
 
         // Admin
         function adminLogin() {
-            const code = document.getElementById('adminCode').value;
+            const username = document.getElementById('adminUsername').value;
+            const password = document.getElementById('adminPassword').value;
             const errorDiv = document.getElementById('loginError');
             
-            if (code === 'BIRD') {
+            // Vérifier les identifiants
+            if (username === 'adminbrawlnest' && password === 'bird') {
                 isAdmin = true;
-                document.getElementById('adminLogin').style.display = 'none';
-                document.getElementById('adminForm').style.display = 'block';
-                errorDiv.textContent = '';
-                
-                // Rafraîchir l'affichage pour montrer les boutons de suppression
-                displayEvents();
-                displayNews();
-                updateAdminLists();
+                isOwner = false;
+                adminRole = 'Administrateur';
+            } else if (username === 'ownerbrawlnest' && password === 'chefbird') {
+                isAdmin = true;
+                isOwner = true;
+                adminRole = 'Propriétaire';
             } else {
-                errorDiv.textContent = 'Code incorrect !';
+                errorDiv.textContent = 'Identifiant ou mot de passe incorrect !';
+                return;
             }
+            
+            // Connexion réussie
+            document.getElementById('adminLogin').style.display = 'none';
+            document.getElementById('adminForm').style.display = 'block';
+            document.getElementById('adminRoleDisplay').textContent = `Connecté en tant que : ${adminRole}`;
+            errorDiv.textContent = '';
+            
+            // Afficher les boutons owner si nécessaire
+            if (isOwner) {
+                document.getElementById('ownerButtons').style.display = 'block';
+            }
+            
+            // Rafraîchir l'affichage
+            displayEvents();
+            displayNews();
+            updateAdminLists();
         }
 
         function adminLogout() {
             isAdmin = false;
+            isOwner = false;
+            adminRole = '';
             document.getElementById('adminLogin').style.display = 'block';
             document.getElementById('adminForm').style.display = 'none';
-            document.getElementById('adminCode').value = '';
+            document.getElementById('adminUsername').value = '';
+            document.getElementById('adminPassword').value = '';
+            document.getElementById('ownerButtons').style.display = 'none';
+            
+            // Cacher les formulaires
+            hideEventForm();
+            hideNewsForm();
             
             // Masquer les boutons de suppression
             displayEvents();
             displayNews();
             updateAdminLists();
+        }
+
+        // Fonctions pour afficher/cacher les formulaires
+        function showEventForm() {
+            hideNewsForm();
+            document.getElementById('eventFormSection').style.display = 'block';
+            // Définir la date/heure par défaut
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            document.getElementById('eventDateTime').value = now.toISOString().slice(0,16);
+        }
+
+        function hideEventForm() {
+            document.getElementById('eventFormSection').style.display = 'none';
+            // Réinitialiser le formulaire
+            document.getElementById('eventTitle').value = '';
+            document.getElementById('eventDescription').value = '';
+            document.getElementById('eventDateTime').value = '';
+            document.getElementById('eventDuration').value = '';
+            document.getElementById('eventStatus').value = 'upcoming';
+        }
+
+        function showNewsForm() {
+            hideEventForm();
+            document.getElementById('newsFormSection').style.display = 'block';
+        }
+
+        function hideNewsForm() {
+            document.getElementById('newsFormSection').style.display = 'none';
+            // Réinitialiser le formulaire
+            document.getElementById('newsTitle').value = '';
+            document.getElementById('newsContent').value = '';
         }
 
         // Événements
@@ -1020,22 +1102,36 @@
             updateAdminLists();
 
             // Réinitialiser le formulaire
-            document.getElementById('eventTitle').value = '';
-            document.getElementById('eventDescription').value = '';
-            document.getElementById('eventDateTime').value = '';
-            document.getElementById('eventDuration').value = '';
+            hideEventForm();
 
             if (status === 'ongoing') {
                 startEventTimer(event);
             }
 
-            // Envoyer notification
+            // Notification pour tous les utilisateurs (amélioration)
             newEventCount++;
             updateBadge('events', newEventCount);
-            showNotification(
-                "🎮 Nouvel événement !",
-                `${title} - ${status === 'ongoing' ? 'En cours maintenant' : 'Programmé pour le ' + eventDate.toLocaleDateString('fr-FR')}`
-            );
+            
+            // Notification plus détaillée
+            const eventDateStr = eventDate.toLocaleDateString('fr-FR', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            const eventTimeStr = eventDate.toLocaleTimeString('fr-FR', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            let notificationBody = '';
+            if (status === 'ongoing') {
+                notificationBody = `${title} est maintenant en cours ! Rejoignez-nous sur Discord.`;
+            } else {
+                notificationBody = `${title} - Programmé pour le ${eventDateStr} à ${eventTimeStr}`;
+            }
+            
+            showNotification("🎮 Nouvel événement !", notificationBody);
 
             alert('Événement ajouté avec succès !');
         }
@@ -1154,9 +1250,12 @@
         }
 
         function clearEvents() {
-            if (!isAdmin) return;
+            if (!isOwner) {
+                alert('Seul le propriétaire peut effectuer cette action !');
+                return;
+            }
             
-            if (confirm('Êtes-vous sûr de vouloir supprimer tous les événements ?')) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer tous les événements ? Cette action est irréversible !')) {
                 events = [];
                 Object.keys(eventTimers).forEach(id => {
                     clearInterval(eventTimers[id]);
@@ -1166,6 +1265,9 @@
                 displayEvents();
                 updateStats();
                 updateAdminLists();
+                
+                // Notification de suppression massive
+                showNotification("🗑️ Événements supprimés", "Tous les événements ont été supprimés par le propriétaire.");
             }
         }
 
@@ -1195,15 +1297,16 @@
             updateAdminLists();
 
             // Réinitialiser le formulaire
-            document.getElementById('newsTitle').value = '';
-            document.getElementById('newsContent').value = '';
+            hideNewsForm();
 
-            // Envoyer notification
+            // Notification améliorée pour tous les utilisateurs
             newNewsCount++;
             updateBadge('news', newNewsCount);
+            
+            const newsPreview = content.length > 80 ? content.substring(0, 80) + '...' : content;
             showNotification(
                 "📰 Nouvelle actualité !",
-                `${title} - ${content.substring(0, 50)}${content.length > 50 ? '...' : ''}`
+                `${title} - ${newsPreview}`
             );
 
             alert('News publiée avec succès !');
@@ -1248,14 +1351,20 @@
         }
 
         function clearNews() {
-            if (!isAdmin) return;
+            if (!isOwner) {
+                alert('Seul le propriétaire peut effectuer cette action !');
+                return;
+            }
             
-            if (confirm('Êtes-vous sûr de vouloir supprimer toutes les news ?')) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer toutes les news ? Cette action est irréversible !')) {
                 news = [];
                 saveNews();
                 displayNews();
                 updateStats();
                 updateAdminLists();
+                
+                // Notification de suppression massive
+                showNotification("🗑️ News supprimées", "Toutes les news ont été supprimées par le propriétaire.");
             }
         }
 
@@ -1424,11 +1533,6 @@
                     closeSidebar();
                 }
             });
-
-            // Définir la date/heure par défaut dans le formulaire
-            const now = new Date();
-            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-            document.getElementById('eventDateTime').value = now.toISOString().slice(0,16);
         });
     </script>
 </body>
